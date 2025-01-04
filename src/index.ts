@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import uploadRoutes from './routes/upload';
 import parseRoutes from './routes/parse';
+import allLogs from './routes/get-logs';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.get('/', (req: Request, res: Response): void => {
 
 app.use('/api', parseRoutes);
 app.use('/api', uploadRoutes);
+app.use('/api', allLogs);
 
 app.listen(PORT, (): void => {
   console.log(`Server is running on http://localhost:${PORT}`);
