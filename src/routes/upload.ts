@@ -27,15 +27,16 @@ router.post('/upload', upload.single('logfile'), (req: Request, res: Response): 
       const parsedLog = parseSyslogLine(line);
       const logEntry = new Log(parsedLog);
       await logEntry.save();
-    parsedLogs.push(parsedLog);
+      parsedLogs.push(parsedLog);
     } catch (error) {
       console.error(`Failed to parse line: ${line}`);
+      return res.status(500).json({ error: 'Failed to parse log line' });
     }
   });
 
   rl.on('close', () => {
     fs.unlinkSync(filePath); // Delete the file after processing
-    res.json(parsedLogs);
+    return res.json(parsedLogs);
   });
 });
 
