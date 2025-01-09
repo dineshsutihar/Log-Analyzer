@@ -1,15 +1,29 @@
-version: "3.8"
+version: "4.0"
+
 services:
+  web:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/usr/src/app 
+      - /usr/src/app/node_modules 
+    depends_on:
+      - api
+
   api:
-    build: .
+    build: ./backend
     ports:
       - "3000:3000"
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
     depends_on:
       db:
-        condition: service_healthy  # Wait for MongoDB to be fully ready
+        condition: service_healthy
     environment:
       - MONGODB_URI=mongodb://db:27017/loganalyzer
-    restart: unless-stopped  # Ensures the API restarts if it crashes
+    restart: unless-stopped
 
   db:
     image: mongo:latest
@@ -23,7 +37,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: unless-stopped  # Ensures MongoDB restarts if it crashes
+    restart: unless-stopped
 
 volumes:
   mongodb_data:
