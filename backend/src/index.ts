@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import uploadRoutes from './routes/upload';
 import parseRoutes from './routes/parse';
@@ -9,6 +10,8 @@ dotenv.config();
 
 const app = express();
 const PORT: number = parseInt(process.env.PORT || '3000', 10);
+
+app.use(cors()); 
 
 connectToDatabase();
 

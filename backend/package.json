@@ -25,6 +25,7 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/mongoose": "^5.11.96",
     "@types/multer": "^1.4.12",
