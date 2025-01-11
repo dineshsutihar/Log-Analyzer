@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import uploadRoutes from './routes/upload';
 import parseRoutes from './routes/parse';
 import allLogs from './routes/get-logs';
-import { connectToDatabase } from './db/connect';
+import connectToDatabase from './db/connect';
 
 dotenv.config();
 
