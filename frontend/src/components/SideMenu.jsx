@@ -9,6 +9,7 @@ import Typography from "@mui/material/Typography";
 import MenuContent from "./MenuContent";
 import OptionsMenu from "./OptionsMenu";
 import Logo from "./LogoDash";
+import { UserButton, UserProfile, useUser } from "@clerk/clerk-react";
 
 const drawerWidth = 240;
 
@@ -25,6 +26,7 @@ const Drawer = styled(MuiDrawer)({
 
 export default function SideMenu() {
   const [open, setOpen] = React.useState(true);
+  const { user } = useUser();
   return (
     <Drawer
       variant="permanent"
@@ -70,24 +72,41 @@ export default function SideMenu() {
           borderColor: "divider",
         }}
       >
-        <Avatar
-          sizes="small"
-          alt="Dinesh Sutihar"
-          src="https://i.pravatar.cc/300"
-          sx={{ width: 36, height: 36 }}
+        <UserButton
+          component={UserProfile}
+          sx={{
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+          appearance={{
+            elements: {
+              userButtonAvatarBox: {
+                width: 36,
+                height: 36,
+                marginRight: 0,
+              },
+              userButtonAvatar: {
+                width: 36,
+                height: 36,
+              },
+            },
+          }}
         />
         <Box sx={{ mr: "auto" }}>
           <Typography
             variant="body2"
             sx={{ fontWeight: 500, lineHeight: "16px" }}
           >
-            Dinesh Sutihar
+            {user.fullName || user.emailAddresses[0].emailAddress}
           </Typography>
           <Typography variant="caption" sx={{ color: "text.secondary" }}>
-            dinesh@loganlyzr.com
+            {user?.emailAddresses[0].emailAddress}
           </Typography>
         </Box>
-        <OptionsMenu />
+        {/* <OptionsMenu /> */}
       </Stack>
     </Drawer>
   );
