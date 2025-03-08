@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy  # Wait for MongoDB to be fully ready
+    environment:
+      - MONGODB_URI=mongodb://db:27017/loganalyzer
+    restart: unless-stopped  # Ensures the API restarts if it crashes
+
+  db:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped  # Ensures MongoDB restarts if it crashes
+
+volumes:
+  mongodb_data:
