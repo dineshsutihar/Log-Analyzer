@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/stats', async (req: Request, res: Response) => {
   try {
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 180); // 180 days ago
+    startDate.setDate(startDate.getDate() - 90); // 90 days ago
 
     const totalLogsAgg = await LinuxLogModel.aggregate([
       {
@@ -104,21 +104,21 @@ router.get('/stats', async (req: Request, res: Response) => {
       {
         title: "Total Logs",
         value: totalLogsSum, // e.g. "14k" or a number
-        interval: "Last 180 days",
+        interval: "Last 90 days",
         trend: totalLogsTend, // "up", "down", or "neutral"
         data: totalLogsData, // [0, 3, 5, 2, ...] for 180 days
       },
       {
         title: "Error Count",
         value: errorLogsSum,
-        interval: "Last 180 days",
+        interval: "Last 90 days",
         trend: errorLogsTend,
         data: errorLogsData,
       },
       {
         title: "Warning Count",
         value: warningLogsSum,
-        interval: "Last 180 days",
+        interval: "Last 90 days",
         trend: warningLogsTend,
         data: warningLogsData,
       },
@@ -141,7 +141,7 @@ function buildDailyArray(
 
   for (const doc of aggResults) {
     const { year, month, day } = doc._id;
-    const thisDate = new Date(year, month - 1, day); // month is 0-indexed in JS
+    const thisDate = new Date(year, month - 1, day); // month is 0-indexed 
     const index = Math.floor((thisDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 
     if (index >= 0 && index < daysCount) {
