@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import uploadRoutes from './routes/upload';
 import allLogs from './routes/getAllLogs';
+import getStats from './routes/getStats';
 import connectToDatabase from './db/connect';
 
 dotenv.config();
@@ -24,6 +25,7 @@ app.get('/', (req: Request, res: Response): void => {
 
 app.use('/api', uploadRoutes);
 app.use('/api', allLogs);
+app.use('/api', getStats)
 
 app.listen(PORT, (): void => {
   console.log(`Server is running on http://localhost:${PORT}`);
