@@ -6,16 +6,6 @@ const router = express.Router();
 
 router.get('/logtypeStatus', async (req: Request, res: Response) => {
   try {
-    /*
-    const data = [
-  { label: "SYSLOG", value: 50000 },
-  { label: "WINDOWLOG", value: 35000 },
-  { label: "AUTHLOG", value: 10000 },
-  { label: "KERNEL", value: 10000 },
-  { label: "UNKNOWN", value: 5000 },
-];
-    */
-
     const syslogCount = await LinuxLogModel.countDocuments({ logType: 'SYSLOG' });
     const windowlogCount = await LinuxLogModel.countDocuments({ logType: 'WINDOWLOG' });
     const authlogCount = await LinuxLogModel.countDocuments({ logType: 'AUTH' });
