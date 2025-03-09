@@ -85,7 +85,7 @@ router.get('/stats', async (req: Request, res: Response) => {
     ]);
 
 
-    // Format Helper to build a 180 days array
+    // Format Helper to build a 90 days array
     const totalLogsData = buildDailyArray(totalLogsAgg, startDate);
     const errorLogsData = buildDailyArray(errorLogsAgg, startDate);
     const warningLogsData = buildDailyArray(warningLogsAgg, startDate);
@@ -99,6 +99,8 @@ router.get('/stats', async (req: Request, res: Response) => {
     const totalLogsTend = computeTrend(totalLogsData);
     const errorLogsTend = computeTrend(errorLogsData);
     const warningLogsTend = computeTrend(warningLogsData);
+
+
 
     res.json([
       {
@@ -136,7 +138,7 @@ function buildDailyArray(
   aggResults: { _id: { year: number; month: number; day: number }; count: number }[],
   startDate: Date
 ): number[] {
-  const daysCount = 180;
+  const daysCount = 90;
   const dailyArray = new Array(daysCount).fill(0);
 
   for (const doc of aggResults) {
