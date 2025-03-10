@@ -31,7 +31,7 @@ const getSeverityPrompt = (line: string, userText?: string) => {
   if (userText) {
     prompt += `\nUser's additional question: "${userText}"`;
   }
-  prompt += `\n\nPlease provide a detailed analysis of the log and give answer in step wise. and your answer should not exceed more than 500 words.`;
+  prompt += `\n\nPlease provide a detailed analysis of the log and fix if required and give answer in step wise.`;
 
   return prompt;
 };
