@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import uploadRoutes from './routes/upload';
 import parseRoutes from './routes/parse';
-import allLogs from './routes/get-logs';
+import allLogs from './routes/getAllLogs';
 import connectToDatabase from './db/connect';
 
 dotenv.config();
