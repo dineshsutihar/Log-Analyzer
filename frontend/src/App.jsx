@@ -9,11 +9,12 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard')
 
   return (
-    <div className="min-h-screen text-gray-200">
-      {/* Top Navbar */}
-      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
+    <div className="flex">
+      <div className="fixed top-0 left-0 h-full w-41 p-8 bg-gray-200">
+        <Navbar activeTab={activeTab} setActiveTab={setActiveTab} vertical />
+      </div>
 
-      <div className="p-4">
+      <div className="ml-41 w-full bg-gray-600">
         {activeTab === 'dashboard' ? <Dashboard /> : <CheckLog />}
       </div>
     </div>
