@@ -1,89 +1,267 @@
-import React from 'react'
+import React, { useState } from 'react'
 import DailyLogsBarGraph from './DailyLogsBarGraph'
-import { PieChart, Pie, Cell, Legend, ResponsiveContainer } from 'recharts'
+import { PieChart } from '@mui/x-charts/PieChart'
 
 const pieChartsData = {
     userLogon: [
-        { name: 'Administrator', value: 30 },
-        { name: 'Orion11s', value: 25 },
-        { name: 'System', value: 20 },
-        { name: 'Local Users', value: 5 },
-        { name: 'Guest', value: 10 },
-        { name: 'Developer', value: 15 },
-        { name: 'Service Account', value: 8 },
-        { name: 'Others', value: 20 },
+        { id: 0, label: 'Administrator', value: 30 },
+        { id: 1, label: 'Orion11s', value: 25 },
+        { id: 2, label: 'System', value: 20 },
+        { id: 3, label: 'Local Users', value: 5 },
+        { id: 4, label: 'Guest', value: 10 },
+        { id: 5, label: 'Developer', value: 15 },
+        { id: 6, label: 'Service Account', value: 8 },
+        { id: 7, label: 'Others', value: 20 },
     ],
     logonFailures: [
-        { name: 'Password Error', value: 40 },
-        { name: 'Account Locked', value: 30 },
-        { name: 'Unknown User', value: 30 },
-        { name: 'MFA Failure', value: 25 },
-        { name: 'Account Disabled', value: 15 },
+        { id: 0, label: 'Password Error', value: 40 },
+        { id: 1, label: 'Account Locked', value: 30 },
+        { id: 2, label: 'Unknown User', value: 30 },
+        { id: 3, label: 'MFA Failure', value: 25 },
+        { id: 4, label: 'Account Disabled', value: 15 },
     ],
     issueType: [
-        { name: 'Hardware', value: 25 },
-        { name: 'Software', value: 50 },
-        { name: 'Hybrid', value: 25 },
-        { name: 'Other', value: 10 },
+        { id: 0, label: 'Hardware', value: 25 },
+        { id: 1, label: 'Software', value: 50 },
+        { id: 2, label: 'Hybrid', value: 25 },
+        { id: 3, label: 'Other', value: 10 },
     ],
     fixationStatus: [
-        { name: 'Fixed', value: 60 },
-        { name: 'Not Fixed', value: 40 },
-        { name: 'In Progress', value: 20 },
+        { id: 0, label: 'Fixed', value: 60 },
+        { id: 1, label: 'Not Fixed', value: 40 },
+        { id: 2, label: 'In Progress', value: 20 },
     ],
     errorSeverity: [
-        { name: 'Critical', value: 35 },
-        { name: 'Major', value: 40 },
-        { name: 'Minor', value: 25 },
+        { id: 0, label: 'Critical', value: 35 },
+        { id: 1, label: 'Major', value: 40 },
+        { id: 2, label: 'Minor', value: 25 },
     ],
     errorCategory: [
-        { name: 'Syntax Error', value: 30 },
-        { name: 'Runtime Error', value: 40 },
-        { name: 'Database Error', value: 20 },
-        { name: 'Network Error', value: 10 },
-        { name: 'Other', value: 15 },
+        { id: 0, label: 'Syntax Error', value: 30 },
+        { id: 1, label: 'Runtime Error', value: 40 },
+        { id: 2, label: 'Database Error', value: 20 },
+        { id: 3, label: 'Network Error', value: 10 },
+        { id: 4, label: 'Other', value: 15 },
     ],
 }
 
-const COLORS = [
-    '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#CC0099',
-    '#FF6347', '#32CD32', '#FFD700', '#8A2BE2', '#00CED1'
-]
+function LogUserPie({ title, data }) {
+    const [selected, setSelected] = useState(null)
 
+    const handleClick = (event, params) => {
+        setSelected(params.label)
+    }
 
-function PieChartCard({ title, data }) {
     return (
-        <div className="p-4 m-2 border border-gray-300 rounded w-fit">
-            <h4 className="text-md mb-2 text-center">{title}</h4>
-            <div className="h-72 w-100">
-                <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                        <Pie data={data} dataKey="value" outerRadius={100} fill="#8884d8">
-                            {data.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                        </Pie>
-                        <Legend layout="vertical" align="right" verticalAlign="middle" />
-                    </PieChart>
-                </ResponsiveContainer>
-            </div>
+        <div>
+            <h1 className="text-center text-sm text-gray-100 mb-5">{title}</h1>
+            <PieChart
+                series={[
+                    {
+                        data,
+                        highlightScope: { faded: 'global', highlighted: 'item' },
+                        innerRadius: 30,
+                        outerRadius: 100,
+                        paddingAngle: 3,
+                        cornerRadius: 10,
+                        startAngle: -45,
+                        endAngle: 225,
+                        onClick: handleClick,
+                        animation: { easing: 'easeOut', duration: 1000 },
+                    },
+                ]}
+                width={230}
+                height={200}
+                slotProps={{ legend: { hidden: true } }}
+                margin={{ left: 0, right: 0, top: 0, bottom: 0 }}
+            />
+            {selected && <p className="text-center text-sm mt-2">Selected: {selected}</p>}
         </div>
     )
 }
 
+function LogonFailuresPieChart({ title, data }) {
+    const [selected, setSelected] = useState(null)
+
+    const handleClick = (event, params) => {
+        setSelected(params.label)
+    }
+
+    return (
+        <div>
+            <PieChart
+                series={[
+                    {
+                        data,
+                        highlightScope: { faded: 'global', highlighted: 'item' },
+                        innerRadius: 10,
+                        outerRadius: 100,
+                        paddingAngle: 10,
+                        cornerRadius: 40,
+                        startAngle: -150,
+                        endAngle: 200,
+                        onClick: handleClick,
+                        animation: { easing: 'easeOut', duration: 1000 },
+                    },
+                ]}
+                width={230}
+                height={230}
+                slotProps={{ legend: { hidden: true } }}
+                margin={{ left: 0, right: 0, top: 0, bottom: 0 }}
+            />
+            <h1 className="text-center text-sm text-gray-900">{title}</h1>
+            {selected && <p className="text-center text-sm mt-2">Selected: {selected}</p>}
+        </div>
+    );
+}
+
+
+function IssueTypePieChart({ title, data }) {
+    const [selected, setSelected] = useState(null)
+
+    const handleClick = (event, params) => {
+        setSelected(params.label)
+    }
+
+    return (
+        <div>
+            <PieChart
+                series={[
+                    {
+                        data,
+                        highlightScope: { faded: 'global', highlighted: 'item' },
+                        innerRadius: 15,
+                        outerRadius: 100,
+                        paddingAngle: 50,
+                        cornerRadius: 10,
+                        startAngle: -100,
+                        endAngle: 350,
+                        onClick: handleClick,
+                        animation: { easing: 'easeOut', duration: 1000 },
+                    },
+                ]}
+                width={230}
+                height={230}
+                slotProps={{ legend: { hidden: true } }}
+                margin={{ left: 0, right: 0, top: 0, bottom: 0 }}
+            />
+            <h1 className="text-center text-sm text-gray-900">{title}</h1>
+            {selected && <p className="text-center text-sm mt-2">Selected: {selected}</p>}
+        </div>
+    );
+}
+
+function FixationStatusPieChart({ title, data }) {
+    const [selected, setSelected] = useState(null)
+
+    const handleClick = (event, params) => {
+        setSelected(params.label)
+    }
+
+    return (
+        <div>
+            <PieChart
+                series={[
+                    {
+                        data,
+                        highlightScope: { faded: 'global', highlighted: 'item' },
+                        innerRadius: 70,
+                        outerRadius: 100,
+                        paddingAngle: 10,
+                        cornerRadius: 10,
+                        startAngle: 0,
+                        endAngle: 360,
+                        onClick: handleClick,
+                        animation: { easing: 'easeOut', duration: 1000 },
+                    },
+                ]}
+                width={230}
+                height={230}
+                slotProps={{ legend: { hidden: true } }}
+                margin={{ left: 0, right: 0, top: 0, bottom: 0 }}
+            />
+            <h1 className="text-center text-sm text-gray-900">{title}</h1>
+            {selected && <p className="text-center text-sm mt-2">Selected: {selected}</p>}
+        </div>
+    );
+}
+
+function ErrorCategoryPieChart({ title, data }) {
+    const [selected, setSelected] = useState(null)
+
+    const handleClick = (event, params) => {
+        setSelected(params.label)
+    }
+
+    return (
+        <div>
+            <h1 className="text-center text-sm text-gray-100 mt-10 mb-5">{title}</h1>
+            <PieChart
+                series={[
+                    {
+                        data,
+                        highlightScope: { faded: 'global', highlighted: 'item' },
+                        innerRadius: 45,
+                        outerRadius: 100,
+                        paddingAngle: 10,
+                        cornerRadius: 30,
+                        startAngle: 290,
+                        endAngle: -160,
+                        onClick: handleClick,
+                        animation: { easing: 'easeOut', duration: 1000 },
+                    },
+                ]}
+                width={230}
+                height={200}
+                slotProps={{ legend: { hidden: true } }}
+                margin={{ left: 0, right: 0, top: 0, bottom: 0 }}
+            />
+            {selected && <p className="text-center text-sm mt-2">Selected: {selected}</p>}
+        </div>
+    );
+}
+
 function Dashboard() {
     return (
-        <>
-        <DailyLogsBarGraph/>
-        <div className="mt-15 flex flex-wrap justify-center">
-            <PieChartCard title="User Logon by User" data={pieChartsData.userLogon} />
-            <PieChartCard title="Logon Failures by Users" data={pieChartsData.logonFailures} />
-            <PieChartCard title="Type of Issue" data={pieChartsData.issueType} />
-            <PieChartCard title="Fixation Status" data={pieChartsData.fixationStatus} />
-            <PieChartCard title="Error Severity" data={pieChartsData.errorSeverity} />
-            <PieChartCard title="Error Category" data={pieChartsData.errorCategory} />
+        <div>
+            <h5 className="text-purple-700 text-xs">Primary</h5>
+            <h1 className="text-purple-700 text-2xl font-bold">Dashboard</h1>
+
+            <div className="flex gap-4 mt-8 w-full">
+                <div className='w-full'>
+                    <div className='w-full'>
+                        <DailyLogsBarGraph />
+                    </div>
+                    <div className='flex justify-between mt-4'>
+                        <div>
+                            <LogonFailuresPieChart title="Logon Failures" data={pieChartsData.logonFailures}/>
+                        </div>
+                        <div>
+                            <IssueTypePieChart title="Type of Issue" data={pieChartsData.issueType} />
+                        </div>
+                        <div>
+                            <FixationStatusPieChart title="Fixation Status" data={pieChartsData.fixationStatus} />
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-gradient-to-t from-pink-400 via-pink-500 to-pink-600 p-5 rounded-3xl">
+                    <div>
+                        <LogUserPie title="User Logon by User" data={pieChartsData.userLogon} />
+                    </div>
+                    <div>
+                        <ErrorCategoryPieChart title="Error Category" data={pieChartsData.errorCategory} />
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                {/* <PieChartCard title="Logon Failures by Users" data={pieChartsData.logonFailures} />
+                <PieChartCard title="Type of Issue" data={pieChartsData.issueType} />
+                <PieChartCard title="Fixation Status" data={pieChartsData.fixationStatus} />
+                <PieChartCard title="Error Severity" data={pieChartsData.errorSeverity} />
+                <PieChartCard title="Error Category" data={pieChartsData.errorCategory} /> */}
+            </div>
         </div>
-        </>
     )
 }
 

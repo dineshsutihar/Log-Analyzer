@@ -1,5 +1,5 @@
 import React from 'react'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const data = [
     { date: '2023-02-01', logs: 12 },
@@ -16,46 +16,47 @@ const data = [
     { date: '2023-02-12', logs: 23 },
     { date: '2023-02-13', logs: 13 },
     { date: '2023-02-14', logs: 20 },
-    { date: '2023-02-15', logs: 15 },
-    { date: '2023-02-16', logs: 21 },
-    { date: '2023-02-17', logs: 10 },
-    { date: '2023-02-18', logs: 18 },
-    { date: '2023-02-19', logs: 12 },
-    { date: '2023-02-20', logs: 16 },
-    { date: '2023-02-21', logs: 14 }
+    { date: '2023-02-15', logs: 15 }
 ]
 
-// Custom tooltip component for the bar chart.
-const CustomTooltip = ({ active, payload, label }) => {
+// Function to convert date string to day of the week
+const getDayName = (dateString) => {
+    const date = new Date(dateString);
+    const options = { weekday: 'short' };
+    return date.toLocaleDateString('en-US', options);
+};
+
+// Map data to include day names
+const formattedData = data.map(item => ({
+    ...item,
+    day: getDayName(item.date),
+}));
+
+// Custom tooltip component for the area chart
+const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
         return (
-            <div className="p-2 rounded border border-gray-300 bg-white">
-                <p className="text-sm text-gray-700">{`Logs: ${payload[0].value}`}</p>
+            <div className="p-2 rounded-md bg-purple-200">
+                <p className="text-xs text-purple-700">{`Logs: ${payload[0].value}`}</p>
             </div>
-        )
+        );
     }
-    return null
-}
+    return null;
+};
 
-function DailyLogsBarGraph() {
+function DailyLogsAreaChart() {
     return (
-        <div className="mt-25">
-            <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={data}>
-                    <XAxis
-                        dataKey="date"
-                        tick={{ fill: 'white', fontSize: 14 }}
-                        angle={-90}
-                        textAnchor="end"
-                        height={100}
-                    />
-                    <YAxis tick={{ fill: 'white', fontSize: 14 }} />
+        <div className="bg-gradient-to-t from-purple-600 via-purple-700 to-purple-800 p-5 rounded-3xl w-full">
+            <h1 className='text-gray-100 text-sm'>Overview</h1>
+            <ResponsiveContainer width="100%" height={250}>
+                <AreaChart data={formattedData}>
+                    <XAxis dataKey="day" tick={{ fill: '#cccccc', fontSize: 12, fontWeight: 500 }} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="logs" fill="#99ccff"/>
-                </BarChart>
+                    <Area type="monotone" dataKey="logs" stroke="#ff33cc" fill="#bf00ff" strokeWidth={2}/>
+                </AreaChart>
             </ResponsiveContainer>
         </div>
-    )
+    );
 }
 
-export default DailyLogsBarGraph
+export default DailyLogsAreaChart;
