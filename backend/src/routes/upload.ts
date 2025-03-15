@@ -1,43 +1,68 @@
-import { Router, Request, Response } from 'express';
-import fs from 'fs';
-import readline from 'readline';
-import multer from 'multer';
-import { parseSyslogLine } from '../utils/logParser';
-
-import {Log} from '../models/Log';
+import { Router, Request, Response } from "express";
+import multer from "multer";
+// import { parseSyslogLine } from "../utils/logParser";
+import { parseWindowsEventLogCsv } from "../utils/parse-window";
+import { WindowsLogModel } from "../models/LogWindowModel";
 
 const router = Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
-const upload = multer({ dest: 'uploads/' });
-
-router.post('/upload', upload.single('logfile'), (req: Request, res: Response): void => {
+router.post("/upload", upload.single("logfile"), async (req: Request, res: Response) => {
   if (!req.file) {
-    res.status(400).json({ error: 'No file uploaded' });
+    res.status(400).json({ error: "No file uploaded" });
     return;
   }
 
-  const filePath = req.file.path;
-  const fileStream = fs.createReadStream(filePath);
-  const rl = readline.createInterface({ input: fileStream });
+  const { hostname = "Unknown", source = "generic" } = req.body;
+  const fileName = req.file.originalname.toLowerCase();
+  const fileBuffer = req.file.buffer;
 
-  const parsedLogs: any[] = [];
+  try {
+    let logDocument;
 
-  rl.on('line', async(line: string) => {
-    try {
-      const parsedLog = parseSyslogLine(line);
-      const logEntry = new Log(parsedLog);
-      await logEntry.save();
-      parsedLogs.push(parsedLog);
-    } catch (error) {
-      console.error(`Failed to parse line: ${line}`);
-      return res.status(500).json({ error: 'Failed to parse log line' });
+    if (fileName.endsWith(".csv")) {
+      logDocument = await parseWindowsEventLogCsv(fileBuffer);
+
+      // res.json({ message: "Log successfully stored", logId: logDocument._id }); 
+
+
+      // } else if (fileName.endsWith(".log")) {
+      //   const fileStream = Readable.from(fileBuffer);
+      //   const rl = readline.createInterface({ input: fileStream });
+
+      //   const entries: any[] = [];
+      //   for await (const line of rl) {
+      //     try {
+      //       // Pass source if needed for parsing
+      //       const parsedEntry = parseSyslogLine(line, source);
+      //       entries.push(parsedEntry);
+      //     } catch (error) {
+      //       console.error(`Failed to parse line: ${line}`);
+      //     }
+      //   }
+
+      //   logDocument = new LogModel({
+      //     logType: "linux",
+      //     logSubType: source,
+      //     hostname,
+      //     source,
+      //     entries,
+      //     uploadDate: new Date(),
+      //     analyzed: false,
+      //   });
+    } else {
+      res.status(400).json({ error: "Unsupported file type" });
+      return;
     }
-  });
 
-  rl.on('close', () => {
-    fs.unlinkSync(filePath); // Delete the file after processing
-    return res.json(parsedLogs);
-  });
+    const savedLog = await WindowsLogModel.insertMany(logDocument);
+    res.json({ message: "Log successfully stored", logId: savedLog[0]._id });
+  } catch (error) {
+
+    console.error(error);
+    res.status(500).json({ error: "Failed to process the log file" });
+    return;
+  }
 });
 
 export default router;
