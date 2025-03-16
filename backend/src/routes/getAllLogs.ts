@@ -12,4 +12,15 @@ app.get('/linlogs', async (req, res) => {
   res.json(logs);
 });
 
+app.get('/kernellogs', async (req, res) => {
+  const logs = await LinuxLogModel.find({ logType: 'KERNEL' }).limit(100);
+  res.json(logs);
+});
+
+app.get('/authlogs', async (req, res) => {
+  const logs = await LinuxLogModel.find({ logType: 'AUTH' }).limit(100);
+  res.json(logs);
+});
+
+
 export default app;
