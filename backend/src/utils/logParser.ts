@@ -1,6 +1,7 @@
 import grok from 'grok-js';
 import { LinuxLogModel, LinuxLogModelType } from "../models/LinuxLogModel";
 import parseAuthLogFile from "./authlogParser";
+import parseKernelLogFile from './kernellogParser';
 
 export async function parseAllLinuxLog(data: string, source: string = "syslog"): Promise<any> {
 
@@ -9,22 +10,11 @@ export async function parseAllLinuxLog(data: string, source: string = "syslog"):
       return parseAuthLogFile(data);
     }
 
-    // case "kernel.log": {
-    //   // Example kernel.log format:
-    //   // 2025-01-19T08:21:47.913794+05:30 dinesh kernel: audit: type=1400 audit(1737255107.912:165): apparmor="DENIED" operation="capable" ...
-    //   const kernelRegex = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+\+\d{2}:\d{2})\s+(\S+)\s+kernel:\s+(.*)$/;
-    //   const match = line.match(kernelRegex);
-    //   if (!match) {
-    //     throw new Error("Line does not match kernel.log format");
-    //   }
-    //   const [, ts, username, msg] = match;
-    //   timestamp = new Date(ts);
-    //   eventId = "kernel";
-    //   message = msg;
-    //   userId = username; // Optionally capture the username
-    //   severity = message.includes("failed") || message.includes("error") ? "ERROR" : "INFO";
-    //   break;
-    // }
+    case "kernel.log": {
+      // Example kernel.log format:
+      // 2025-01-19T08:21:47.913794+05:30 dinesh kernel: audit: type=1400 audit(1737255107.912:165): apparmor="DENIED" operation="capable" ...
+      return parseKernelLogFile(data);
+    }
     // // TODO: Add more log types as needed and modify the syslog
     // case "syslog": {
     //   // Assume the syslog log is in JSON format.
