@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
-// LinuxLogModel
 
-export interface LinuxLogModel {
+interface LinuxLogModelType {
+  logType: "SYSLOG" | "AUTH" | "KERNEL" | "APPLICATION";
   timestamp: Date;
   severity: "INFO" | "WARNING" | "ERROR" | "CRITICAL";
   eventId: string;
@@ -11,7 +11,8 @@ export interface LinuxLogModel {
   rawLine: string;
 }
 
-const LinuxLogSchema = new Schema<LinuxLogModel & Document>({
+const LinuxLogSchema = new Schema<LinuxLogModelType & Document>({
+  logType: { type: String, enum: ["SYSLOG", "AUTH", "KERNEL", "APPLICATION"], required: true },
   timestamp: { type: Date, required: true },
   severity: { type: String, enum: ["INFO", "WARNING", "ERROR", "CRITICAL"], required: true },
   eventId: { type: String, required: true },
@@ -21,5 +22,5 @@ const LinuxLogSchema = new Schema<LinuxLogModel & Document>({
   rawLine: { type: String, required: true },
 });
 
-const LinuxLogModel = mongoose.model<LinuxLogModel & Document>("LinuxLog", LinuxLogSchema);
-export { LinuxLogModel };
+const LinuxLogModel = mongoose.model<LinuxLogModelType & Document>("LinuxLog", LinuxLogSchema);
+export { LinuxLogModel, type LinuxLogModelType };
