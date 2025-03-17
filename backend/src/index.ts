@@ -11,7 +11,7 @@ dotenv.config();
 const app = express();
 const PORT: number = parseInt(process.env.PORT || '3000', 10);
 
-app.use(cors()); 
+app.use(cors());
 
 connectToDatabase();
 
@@ -23,7 +23,7 @@ app.get('/', (req: Request, res: Response): void => {
   res.send('Log Analyzer Backend is running!');
 });
 
-app.use('/api', parseRoutes);
+// app.use('/api', parseRoutes);
 app.use('/api', uploadRoutes);
 app.use('/api', allLogs);
 
