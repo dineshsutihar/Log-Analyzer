@@ -2,7 +2,6 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import uploadRoutes from './routes/upload';
-import parseRoutes from './routes/parse';
 import allLogs from './routes/getAllLogs';
 import connectToDatabase from './db/connect';
 
@@ -23,7 +22,6 @@ app.get('/', (req: Request, res: Response): void => {
   res.send('Log Analyzer Backend is running!');
 });
 
-// app.use('/api', parseRoutes);
 app.use('/api', uploadRoutes);
 app.use('/api', allLogs);
 
