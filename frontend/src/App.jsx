@@ -30,11 +30,11 @@ function App() {
       <div className="fixed top-0 left-0 h-full w-30 p-5 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300">
         <Navbar activeTab={activeTab} setActiveTab={setActiveTab} vertical />
       </div>
-      <div className="ml-30 mr-70 w-full p-5 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300 h-screen overflow-y-auto scrollbar-hide">
+      <div className="ml-30 mr-80 w-full p-5 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300 h-screen overflow-y-auto scrollbar-hide">
         {renderContent()}
       </div>
 
-      <div className='fixed top-0 right-0 h-full w-70 p-5 bg-indigo-100'>
+      <div className='fixed top-0 right-0 h-full w-80 p-5 bg-gradient-to-t from-gray-100 via-gray-200 to-gray-300'>
         <Collab />
       </div>
     </div>

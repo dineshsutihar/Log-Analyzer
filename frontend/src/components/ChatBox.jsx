@@ -10,17 +10,17 @@ function ChatBox() {
     }
 
     return (
-        <div className="flex space-x-2">
+        <div className="flex text-xs mt-8">
             <input
                 type="text"
                 placeholder="Chat with support..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                className="border rounded px-2 py-1 flex-1"
+                className="border border-r-0 border-gray-400 px-2 py-1 flex-1"
             />
             <button
                 onClick={handleChat}
-                className="bg-purple-800 text-white px-6 py-1 rounded-full cursor-pointer"
+                className="bg-purple-700 text-white px-6 py-1 text-xs cursor-pointer"
             >
                 Chat
             </button>

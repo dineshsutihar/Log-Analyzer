@@ -6,7 +6,7 @@ function CheckLog() {
     const [logs, setLogs] = useState([])
     const [sortOrder, setSortOrder] = useState("desc")
     const [searchQuery, setSearchQuery] = useState("")
-    const [visibleCount, setVisibleCount] = useState(10)
+    const [visibleCount, setVisibleCount] = useState(8)
 
     useEffect(() => {
         // Load sample logs on mount.
@@ -40,24 +40,25 @@ function CheckLog() {
     }
 
     return (
-        <div className='mt-25 text-sm max-w-5xl mx-auto'>
-            <h2 className='text-xl text-center mb-8'>Check Previous Logs</h2>
-            <div className="mb-4 flex space-x-2">
+        <div>
+            <h1 className="text-purple-700 text-2xl font-bold">Check Previous Logs</h1>
+            <div className="mb-4 flex space-x-2 mt-6 text-xs">
                 <button
                     onClick={handleSort}
-                    className="bg-purple-800 text-white px-4 py-1 rounded flex items-center cursor-pointer"
+                    className="bg-purple-700 text-white px-4 py-1 rounded flex items-center cursor-pointer"
                 >
                     DateTime {sortOrder === "asc" ? "▲" : "▼"}
                 </button>
                 <input
                     type="text"
                     placeholder="Search logs..."
-                    className="border rounded px-2 py-2 flex-1"
+                    className="border rounded px-2 py-2 flex-1 border-gray-400"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
             </div>
-            <div>
+
+            <div className='h-[70vh] overflow-y-scroll scrollbar-hide'>
                 {visibleLogs.map((log, idx) => (
                     <LogItem key={idx} log={log} />
                 ))}
@@ -66,7 +67,7 @@ function CheckLog() {
                 <div className="mt-4 text-center">
                     <button
                         onClick={loadMore}
-                        className="bg-purple-800 text-white px-4 py-2 rounded cursor-pointer"
+                        className="bg-purple-700 text-white px-4 py-2 rounded cursor-pointer text-xs"
                     >
                         Load More
                     </button>

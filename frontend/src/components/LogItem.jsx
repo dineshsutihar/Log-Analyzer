@@ -19,11 +19,11 @@ function LogItem({ log }) {
     }
 
     return (
-        <div className="bg-gray-800 shadow rounded mb-2">
-            <div className="flex items-center justify-between p-4">
+        <div className="shadow mb-2 text-sm rounded-lg overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-3">
                 <div className="flex-1 grid grid-cols-4 gap-2">
                     <div>{log.date}</div>
-                    <div>{log.time}</div>
+                    <div className='text-gray-500'>{log.time}</div>
                     <div>{log.userType}</div>
                     <div className={getRiskColor(log.riskPriority)}>
                         {log.riskPriority}
@@ -31,24 +31,24 @@ function LogItem({ log }) {
                 </div>
                 <button
                     onClick={() => setExpanded(!expanded)}
-                    className="bg-purple-800 text-white px-5 py-1 rounded cursor-pointer"
+                    className="bg-purple-700 text-xs text-white px-5 py-1 rounded cursor-pointer"
                 >
                     {expanded ? 'Hide' : 'Show'}
                 </button>
             </div>
             {expanded && (
-                <div className="p-4 border-t">
-                    <div className="mb-2">
-                        <strong>Description:</strong> {log.logMessage}
+                <div className="p-5 border-t-2 border-purple-700 text-sm">
+                    <div className="mb-2 flex gap-2">
+                        {log.logMessage}
                     </div>
-                    <div className="mb-2">
-                        <strong>Event IDs:</strong> {log.eventIDs.join(', ')}
+                    <div className="mb-2 flex gap-2">
+                        <p>Event IDs:</p> {log.eventIDs.join(', ')}
                     </div>
-                    <div className="mb-2">
-                        <strong>Type of Issue:</strong> {log.issueType}
+                    <div className="mb-2 flex gap-2">
+                        <p>Type of Issue:</p> {log.issueType}
                     </div>
-                    <div className="mb-4">
-                        <strong>Fixable Type:</strong> {log.fixableType}
+                    <div className="flex gap-2">
+                        <p>Fixable Type:</p> {log.fixableType}
                     </div>
                     <div>
                         <ChatBox />

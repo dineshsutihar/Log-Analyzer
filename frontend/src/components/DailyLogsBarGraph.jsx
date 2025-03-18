@@ -52,7 +52,7 @@ function DailyLogsAreaChart() {
                 <AreaChart data={formattedData}>
                     <XAxis dataKey="day" tick={{ fill: '#cccccc', fontSize: 12, fontWeight: 500 }} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="logs" stroke="#ff33cc" fill="#bf00ff" strokeWidth={2}/>
+                    <Area type="monotone" dataKey="logs" stroke="#e699ff" fill="#ac00e6" strokeWidth={2}/>
                 </AreaChart>
             </ResponsiveContainer>
         </div>
