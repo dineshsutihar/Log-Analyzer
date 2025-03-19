@@ -1,23 +1,23 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 interface LinuxLogModelType {
-  logType: "SYSLOG" | "AUTH" | "KERNEL" | "APPLICATION";
+  logType: "SYSLOG" | "AUTH" | "KERNEL" | "APPLICATION" | "UNKNOWN";
   timestamp: Date;
   severity: "INFO" | "WARNING" | "ERROR" | "CRITICAL";
   eventId: string;
   message: string;
-  processId?: number;
+  processId?: number | string;
   userId?: string;
   rawLine: string;
 }
 
 const LinuxLogSchema = new Schema<LinuxLogModelType & Document>({
-  logType: { type: String, enum: ["SYSLOG", "AUTH", "KERNEL", "APPLICATION"], required: true },
+  logType: { type: String, enum: ["SYSLOG", "AUTH", "KERNEL", "APPLICATION", "UNKNOWN"], required: true },
   timestamp: { type: Date, required: true },
   severity: { type: String, enum: ["INFO", "WARNING", "ERROR", "CRITICAL"], required: true },
   eventId: { type: String, required: true },
   message: { type: String, required: true },
-  processId: { type: Number },
+  processId: { type: Schema.Types.Mixed },
   userId: { type: String },
   rawLine: { type: String, required: true },
 });
