@@ -19,18 +19,23 @@ router.post("/upload", upload.single("logfile"), async (req: Request, res: Respo
   const fileBuffer = req.file.buffer;
   source = source ? source : fileName;
 
-  if (fileName.endsWith(".csv")) {
-    let logDocument = await parseWindowsEventLogCsv(fileBuffer);
-    await WindowsLogModel.insertMany(logDocument);
-  } else if (fileName.endsWith(".log")) {
-    const parseResult: LinuxLogModelType[] = await parseAllLinuxLog(fileBuffer.toString(), source);
-    await LinuxLogModel.insertMany(parseResult);
-  } else {
-    res.status(400).json({ error: "Unsupported file type" });
-    return;
+  try {
+    if (fileName.endsWith(".csv")) {
+      let logDocument = await parseWindowsEventLogCsv(fileBuffer);
+      await WindowsLogModel.insertMany(logDocument);
+    } else if (fileName.endsWith(".log")) {
+      const parseResult: LinuxLogModelType[] = await parseAllLinuxLog(fileBuffer.toString(), source);
+      await LinuxLogModel.insertMany(parseResult);
+    } else {
+      res.status(400).json({ error: "Unsupported file type" });
+      return;
+    }
+    res.json({ message: "Log successfully stored" });
+  } catch (error) {
+    console.error("Error processing file:", error);
+    res.status(500).json({ error: "Failed to process the log file. Please retry after few minutes..." });
   }
 
-  res.json({ message: "Log successfully stored" });
 }
 );
 
