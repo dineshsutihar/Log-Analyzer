@@ -22,5 +22,10 @@ app.get('/authlogs', async (req, res) => {
   res.json(logs);
 });
 
+app.get('/unknownlogs', async (req, res) => {
+  const logs = await LinuxLogModel.find({ logType: 'UNKNOWN' }).limit(100);
+  res.json(logs);
+});
+
 
 export default app;
