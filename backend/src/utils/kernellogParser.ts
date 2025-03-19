@@ -37,7 +37,8 @@ const KERNEL_PATTERN = [
 
 const kernelParser = grokCollection.createPattern(KERNEL_PATTERN);
 
-export default async function parseKernelLogFile(data: string): Promise<LinuxLogModelType[]> {
+export default async function parseKernelLogFile(data: string, source: string): Promise<LinuxLogModelType[]> {
+  const logType = source.toLowerCase() === 'kernel.log' ? 'KERNEL' : 'SYSLOG';
   const entries: LinuxLogModelType[] = [];
   const rl = readline.createInterface({
     input: Readable.from(data),
@@ -51,14 +52,14 @@ export default async function parseKernelLogFile(data: string): Promise<LinuxLog
     const parsed = kernelParser.parseSync(line) as GrokParseResult;
     if (!parsed) continue;
 
-    const entry = createLogEntry(line, parsed);
+    const entry = createLogEntry(line, parsed, logType);
     if (entry) entries.push(entry);
   }
 
   return entries;
 }
 
-function createLogEntry(rawLine: string, parsed: GrokParseResult): LinuxLogModelType | null {
+function createLogEntry(rawLine: string, parsed: GrokParseResult, logType: string): LinuxLogModelType | null {
   if (!parsed.timestamp || !parsed.userId) {
     console.warn('Invalid log entry - missing timestamp or userId');
     return null;
@@ -67,7 +68,7 @@ function createLogEntry(rawLine: string, parsed: GrokParseResult): LinuxLogModel
   const { eventId, message } = processMessageComponents(parsed);
 
   return {
-    logType: 'KERNEL',
+    logType: `${logType}` as "KERNEL" | "SYSLOG",
     timestamp: new Date(parsed.timestamp),
     severity: inferSeverity(message),
     eventId: eventId || 'NoEvent',
