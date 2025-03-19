@@ -17,15 +17,21 @@ app.get('/kernellogs', async (req, res) => {
   res.json(logs);
 });
 
+app.get('/syslogs', async (req, res) => {
+  const logs = await LinuxLogModel.find({ logType: 'SYSLOG' }).limit(100);
+  res.json(logs);
+});
+
 app.get('/authlogs', async (req, res) => {
   const logs = await LinuxLogModel.find({ logType: 'AUTH' }).limit(100);
   res.json(logs);
 });
 
 app.get('/unknownlogs', async (req, res) => {
-  const logs = await LinuxLogModel.find({ logType: 'UNKNOWN' }).limit(100);
+  const logs = await LinuxLogModel.find({ logType: { $regex: 'UNKNOWN' } }).limit(100);
   res.json(logs);
 });
+
 
 
 export default app;
