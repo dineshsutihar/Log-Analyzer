@@ -1,4 +1,4 @@
-version: "4.0"
+version: "4.3"
 
 services:
   web:
@@ -8,6 +8,12 @@ services:
     volumes:
       - ./frontend:/usr/src/app 
       - /usr/src/app/node_modules 
+
+    develop:
+      watch:
+        - path: ./frontend
+          target: /usr/src/app
+          action: sync
     depends_on:
       - api
 
@@ -16,8 +22,14 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./backend:/usr/src/app
-      - /usr/src/app/node_modules
+      - type: bind
+        source: ./backend
+        target: /usr/src/app
+    develop:
+      watch:
+        - path: ./backend
+          target: /usr/src/app
+          action: sync
     depends_on:
       db:
         condition: service_healthy
@@ -33,7 +45,7 @@ services:
     volumes:
       - mongodb_data:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
       interval: 10s
       timeout: 5s
       retries: 5
