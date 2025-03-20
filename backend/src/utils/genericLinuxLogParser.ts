@@ -39,8 +39,6 @@ export default async function parseGenericLogs(data: string, source:string): Pro
       processId: parsedEntry.process,
       severity: inferSeverity(parsedEntry.message),
     };
-
-    console.log(entry);
     entries.push(entry);
 
   }
