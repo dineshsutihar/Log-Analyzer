@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 interface LinuxLogModelType {
-  logType: "SYSLOG" | "AUTH" | "KERNEL" | "APPLICATION" | "UNKNOWN";
+  logType: "SYSLOG" | "AUTH" | "KERNEL" | "APPLICATION" | "UNKNOWN" | `UNKNOWN-${string}`;
   timestamp: Date;
   severity: "INFO" | "WARNING" | "ERROR" | "CRITICAL";
   eventId: string;
@@ -12,7 +12,15 @@ interface LinuxLogModelType {
 }
 
 const LinuxLogSchema = new Schema<LinuxLogModelType & Document>({
-  logType: { type: String, enum: ["SYSLOG", "AUTH", "KERNEL", "APPLICATION", "UNKNOWN"], required: true },
+  logType: { 
+    type: String, 
+    validate: {
+      validator: function(v: string) {
+        return ["SYSLOG", "AUTH", "KERNEL", "APPLICATION", "UNKNOWN"].includes(v) || v.startsWith("UNKNOWN-");
+      }
+    },
+    required: true 
+  },
   timestamp: { type: Date, required: true },
   severity: { type: String, enum: ["INFO", "WARNING", "ERROR", "CRITICAL"], required: true },
   eventId: { type: String, required: true },
