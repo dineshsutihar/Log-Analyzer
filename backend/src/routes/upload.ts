@@ -14,9 +14,10 @@ router.post("/upload", upload.single("logfile"), async (req: Request, res: Respo
     return;
   }
 
-  const { source = "generic" } = req.body;
+  let { source } = req.body;
   const fileName = req.file.originalname.toLowerCase();
   const fileBuffer = req.file.buffer;
+  source = source ? source : fileName;
 
   if (fileName.endsWith(".csv")) {
     let logDocument = await parseWindowsEventLogCsv(fileBuffer);
