@@ -4,7 +4,10 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { StyledEngineProvider } from "@mui/material/styles";
 import App from "./App.jsx";
 import "./index.css";
-import Dashboard from "./old/Dashboard.jsx";
+
+function Dashboard() {
+  return <h2>Dashboard</h2>;
+}
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
