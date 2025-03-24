@@ -1,44 +1,26 @@
-import React, { useState } from 'react';
-import Navbar from './components/Navbar';
-import Dashboard from './components/Dashboard';
-import CheckLog from './components/CheckLog';
-import ChartLine from './components/ChartLine';
-import LogOut from './components/LogOut';
-import Collab from './components/Collab';
-import './App.css';
+import * as React from "react";
+import CssBaseline from "@mui/material/CssBaseline";
+import Divider from "@mui/material/Divider";
+import AppTheme from "./theme/AppTheme";
+import AppAppBar from "./components/AppAppBar";
+import Hero from "./components/Hero";
+import Features from "./components/Features";
+import FAQ from "./components/FAQ";
+import Footer from "./components/Footer";
 
-function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return <Dashboard />;
-      case 'checkLog':
-        return <CheckLog />;
-      case 'chartLine':
-        return <ChartLine />;
-      case 'logOut':
-        return <LogOut />;
-      default:
-        return <Dashboard />;
-    }
-  };
-
+export default function App(props) {
   return (
-    <div className="flex">
-      <div className="fixed top-0 left-0 h-full w-30 p-5 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300">
-        <Navbar activeTab={activeTab} setActiveTab={setActiveTab} vertical />
+    <AppTheme {...props}>
+      <CssBaseline enableColorScheme />
+      <AppAppBar />
+      <Hero />
+      <div>
+        <Features />
+        <Divider />
+        <FAQ />
+        <Divider />
+        <Footer />
       </div>
-      <div className="ml-30 mr-80 w-full p-5 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300 h-screen overflow-y-auto scrollbar-hide">
-        {renderContent()}
-      </div>
-
-      <div className='fixed top-0 right-0 h-full w-80 p-5 bg-gradient-to-t from-gray-100 via-gray-200 to-gray-300'>
-        <Collab />
-      </div>
-    </div>
+    </AppTheme>
   );
 }
-
-export default App;
