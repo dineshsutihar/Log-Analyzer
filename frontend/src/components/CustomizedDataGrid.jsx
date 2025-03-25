@@ -5,7 +5,7 @@ import { columns, rows } from "./internals/data/gridData";
 export default function CustomizedDataGrid() {
   return (
     <DataGrid
-      checkboxSelection
+      autoSN
       rows={rows}
       columns={columns}
       getRowClassName={(params) =>
@@ -15,7 +15,7 @@ export default function CustomizedDataGrid() {
         pagination: { paginationModel: { pageSize: 20 } },
       }}
       pageSizeOptions={[10, 20, 50]}
-      disableColumnResize
+      // disableColumnResize
       density="compact"
       slotProps={{
         filterPanel: {
