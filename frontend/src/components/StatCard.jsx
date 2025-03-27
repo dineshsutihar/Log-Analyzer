@@ -9,18 +9,23 @@ import Typography from "@mui/material/Typography";
 import { SparkLineChart } from "@mui/x-charts/SparkLineChart";
 import { areaElementClasses } from "@mui/x-charts/LineChart";
 
-function getDaysInMonth(month, year) {
-  const date = new Date(year, month, 0);
-  const monthName = date.toLocaleDateString("en-US", {
-    month: "short",
-  });
-  const daysInMonth = date.getDate();
+function getDaysInMonth() {
+  // Create an array of 90 days from today
   const days = [];
-  let i = 1;
-  while (days.length < daysInMonth) {
-    days.push(`${monthName} ${i}`);
-    i += 1;
+  const startDate = new Date();
+
+  for (let i = 0; i < 90; i++) {
+    const currentDate = new Date(startDate);
+    currentDate.setDate(startDate.getDate() + i);
+
+    const monthName = currentDate.toLocaleDateString("en-US", {
+      month: "short",
+    });
+    const dayOfMonth = currentDate.getDate();
+
+    days.push(`${monthName} ${dayOfMonth}`);
   }
+
   return days;
 }
 
@@ -37,8 +42,7 @@ function AreaGradient({ color, id }) {
 
 export default function StatCard({ title, value, interval, trend, data }) {
   const theme = useTheme();
-  const daysInWeek = getDaysInMonth(4, 2024);
-
+  const daysInWeek = getDaysInMonth();
   const trendColors = {
     up:
       theme.palette.mode === "light"
