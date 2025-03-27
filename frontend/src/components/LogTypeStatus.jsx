@@ -15,47 +15,15 @@ import System from "@mui/icons-material/Computer";
 import Window from "@mui/icons-material/Window";
 import Kernel from "@mui/icons-material/Memory";
 import Auth from "@mui/icons-material/LockOpen";
+import logtypeStatus from "../utils/api/logtypeStatus";
 
-const data = [
-  { label: "SYSLOG", value: 50000 },
-  { label: "WINDOWLOG", value: 35000 },
-  { label: "AUTHLOG", value: 10000 },
-  { label: "KERNEL", value: 10000 },
-  { label: "UNKNOWN", value: 5000 },
-];
-
-const countries = [
-  {
-    name: "SYSLOG",
-    value: 50,
-    flag: <System />,
-    color: "hsl(220, 25%, 65%)",
-  },
-  {
-    name: "WINDOWLOG",
-    value: 35,
-    flag: <Window />,
-    color: "hsl(220, 25%, 45%)",
-  },
-  {
-    name: "AUTHLOG",
-    value: 10,
-    flag: <Auth />,
-    color: "hsl(220, 25%, 30%)",
-  },
-  {
-    name: "KERNEL",
-    value: 10,
-    flag: <Kernel />,
-    color: "hsl(220, 25%, 30%)",
-  },
-  {
-    name: "UNKNOWN",
-    value: 5,
-    flag: <Unknown />,
-    color: "hsl(220, 25%, 20%)",
-  },
-];
+// const data = [
+//   { label: "SYSLOG", value: 50000 },
+//   { label: "WINDOWLOG", value: 35000 },
+//   { label: "AUTHLOG", value: 10000 },
+//   { label: "KERNEL", value: 10000 },
+//   { label: "UNKNOWN", value: 5000 },
+// ];
 
 const StyledText = styled("text", {
   shouldForwardProp: (prop) => prop !== "variant",
@@ -120,6 +88,55 @@ const colors = [
 ];
 
 export default function LogTypeStatus() {
+  const [data, setData] = React.useState([]);
+  const [totalCount, setTotalCount] = React.useState("0");
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await logtypeStatus();
+        console.log("LogTypeStatus response:", response);
+        setData(response);
+
+        //convert to string with the K notation
+        const total = response.reduce((acc, item) => acc + item.value, 0);
+        const totalString =
+          total >= 1000 ? `${(total / 1000).toFixed(1)}K` : total.toString();
+        setTotalCount(totalString);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+  const total = data.reduce((acc, item) => acc + item.value, 0);
+
+  const iconMap = {
+    SYSLOG: { flag: <System />, color: "hsl(220, 25%, 65%)" },
+    WINDOWLOG: { flag: <Window />, color: "hsl(220, 25%, 45%)" },
+    AUTHLOG: { flag: <Auth />, color: "hsl(220, 25%, 30%)" },
+    KERNEL: { flag: <Kernel />, color: "hsl(220, 25%, 30%)" },
+    UNKNOWN: { flag: <Unknown />, color: "hsl(220, 25%, 20%)" },
+  };
+
+  const logData = data.map((item) => {
+    const percentage = total > 0 ? Math.round((item.value / total) * 100) : 0;
+    const defaultIcon = { flag: <Unknown />, color: "hsl(220, 25%, 20%)" };
+    const { flag, color } = iconMap[item.label] || defaultIcon;
+
+    return {
+      name: item.label,
+      value: percentage,
+      flag,
+      color,
+      rawValue: item.value,
+    };
+  });
+
+  if (loading) return <div>Loading...</div>;
   return (
     <Card
       variant="outlined"
@@ -167,11 +184,11 @@ export default function LogTypeStatus() {
                 legend: { hidden: true },
               }}
             >
-              <PieCenterLabel primaryText="98.5K" secondaryText="Total" />
+              <PieCenterLabel primaryText={totalCount} secondaryText="Total" />
             </PieChart>
           </Box>
           <Box sx={{ flexGrow: 1, width: "100%" }}>
-            {countries.map((country, index) => (
+            {logData.map((country, index) => (
               <Stack
                 key={index}
                 direction="row"
