@@ -55,13 +55,14 @@ export default function MainGrid() {
           <LogAnalyzedBarChart />
         </Grid>
       </Grid>
-      <Grid container spacing={2} columns={12}>
+      {/* // TODO: add line Graph to show the trend of the logs over time */}
+      {/* <Grid container spacing={2} columns={12}>
         <Grid size={{ xs: 12, lg: 6 }}>
           <Stack gap={2} direction={{ xs: "column", sm: "row", lg: "column" }}>
             <SessionsChart />
           </Stack>
         </Grid>
-      </Grid>
+      </Grid> */}
     </Box>
   );
 }
