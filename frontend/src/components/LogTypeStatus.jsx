@@ -96,7 +96,6 @@ export default function LogTypeStatus() {
     const fetchData = async () => {
       try {
         const response = await logtypeStatus();
-        console.log("LogTypeStatus response:", response);
         setData(response);
 
         //convert to string with the K notation
