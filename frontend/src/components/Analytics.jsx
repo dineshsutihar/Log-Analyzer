@@ -8,7 +8,7 @@ export default function Analytics() {
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
       <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
-        Details
+        Total Log Analytics Details
       </Typography>
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, lg: 12 }}>
