@@ -9,6 +9,7 @@ import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import AnalyticsRoundedIcon from "@mui/icons-material/AnalyticsRounded";
 import Chat from "@mui/icons-material/Chat";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
+import CloudUpload from "@mui/icons-material/CloudUpload";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 import HelpRoundedIcon from "@mui/icons-material/HelpRounded";
 import { useRecoilState } from "recoil";
@@ -18,7 +19,7 @@ const mainListItems = [
   { text: "Home", icon: <HomeRoundedIcon /> },
   { text: "Analytics", icon: <AnalyticsRoundedIcon /> },
   { text: "Chat", icon: <Chat /> },
-  // { text: "Tasks", icon: <AssignmentRoundedIcon /> },
+  { text: "Upload", icon: <CloudUpload /> },
 ];
 
 const secondaryListItems = [

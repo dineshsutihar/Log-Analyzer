@@ -18,6 +18,7 @@ import Chat from "./Chat";
 import Analytics from "./Analytics";
 import { useRecoilValue } from "recoil";
 import { activeViewState } from "../utils/state";
+import Upload from "./Upload";
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -37,6 +38,8 @@ export default function Dashboard(props) {
         return <Analytics />;
       case "chat":
         return <Chat />;
+      case "upload":
+        return <Upload />;
       default:
         return <MainGrid />;
     }
