@@ -5,21 +5,21 @@ import { StyledEngineProvider } from "@mui/material/styles";
 import App from "./App.jsx";
 import "./index.css";
 import NotFound from "./components/NotFound.jsx";
-
-function Dashboard() {
-  return <h2>Dashboard</h2>;
-}
+import Dashboard from "./components/Dashboard.jsx";
+import { RecoilRoot } from "recoil";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <StyledEngineProvider injectFirst>
-      <Router>
-        <Routes>
-          <Route path="/" element={<App />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
+      <RecoilRoot>
+        <Router>
+          <Routes>
+            <Route path="/" element={<App />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Router>
+      </RecoilRoot>
     </StyledEngineProvider>
   </StrictMode>
 );
