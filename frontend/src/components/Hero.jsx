@@ -117,6 +117,8 @@ export default function Hero() {
               color="primary"
               size="small"
               sx={{ minWidth: "fit-content" }}
+              href="/dashboard"
+              component={Link}
             >
               Get Started
             </Button>
