@@ -8,6 +8,6 @@ export const activeViewState = atom({
 export const userState = atom ({
   
     key:'userState', 
-    default: {id: 0, text: "", sender: "user"},
+    default: {id: 0, text: "", sender: "user", logMessage: ""},
   
 })

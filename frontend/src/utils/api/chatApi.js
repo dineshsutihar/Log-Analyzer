@@ -17,7 +17,6 @@ export default async function chatApi(logId, userText) {
   }
 
   const dataJson = await data.json();
-  console.log(dataJson);
 
   if (!dataJson) {
     throw new Error("No data found");

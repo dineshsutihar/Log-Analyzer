@@ -13,11 +13,25 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ChatIcon from "@mui/icons-material/Chat";
+import { useRecoilState } from "recoil";
+import { userState } from "../utils/state";
+import { activeViewState } from "../utils/state";
 
-export default function LogDetailsDialog({ selectedRow, onClose }) {
+export default function LogDetailsDialog({ selectedRow, onClose, logMessage }) {
+  const [, setViewState] = useRecoilState(activeViewState);
+  const [, setUserState] = useRecoilState(userState);
+
   if (!selectedRow) return null;
 
-  // Helper function to format values based on type
+  const handleChatClick = () => {
+    setUserState({
+      id: selectedRow.id,
+      sender: "user",
+      logMessage: logMessage,
+    });
+    setViewState("chat");
+  };
+
   const formatValue = (key, value) => {
     if (value === null || value === undefined) {
       return (
@@ -63,11 +77,9 @@ export default function LogDetailsDialog({ selectedRow, onClose }) {
     return <Typography variant="body2">{value}</Typography>;
   };
 
-  // Convert key strings to a more readable format
   const formatLabel = (key) =>
     key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 
-  // Prepare entries from the selected row
   const entries = Object.entries(selectedRow).map(([key, value]) => ({
     key,
     value,
@@ -95,13 +107,13 @@ export default function LogDetailsDialog({ selectedRow, onClose }) {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           Log Details #{selectedRow.id}
         </Typography>
-        {/* Conditionally render the Chat button if analyzed is false */}
         {selectedRow.analyzed === false && (
           <Button
             variant="contained"
             color="secondary"
             startIcon={<ChatIcon />}
             sx={{ mr: 2 }}
+            onClick={handleChatClick}
           >
             Chat
           </Button>
@@ -114,6 +126,7 @@ export default function LogDetailsDialog({ selectedRow, onClose }) {
           <CloseIcon />
         </IconButton>
       </DialogTitle>
+
       <DialogContent dividers sx={{ p: 3 }}>
         <Grid container spacing={2}>
           {entries.map(({ key, value, isWide }) => (
@@ -132,7 +145,7 @@ export default function LogDetailsDialog({ selectedRow, onClose }) {
                     variant="subtitle2"
                     sx={{ color: "text.secondary" }}
                   >
-                    {formatLabel(key)}
+                    {key === "_id" ? "ID" : formatLabel(key)}
                   </Typography>
                   {formatValue(key, value)}
                 </Stack>

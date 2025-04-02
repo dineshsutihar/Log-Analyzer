@@ -10,6 +10,8 @@ export default function CustomizedDataGrid() {
   const [error, setError] = React.useState(null);
   // State to track the currently selected row for the overlay
   const [selectedRow, setSelectedRow] = React.useState(null);
+  const [selectLogMessage, setSelectLogMessage] =
+    React.useState("No data available");
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -31,11 +33,13 @@ export default function CustomizedDataGrid() {
   // Handle row click event to open the overlay with details
   const handleRowClick = (params) => {
     setSelectedRow(params.row);
+    setSelectLogMessage(params.row.message);
   };
 
   // Close the overlay
   const handleCloseOverlay = () => {
     setSelectedRow(null);
+    setSelectLogMessage("No data available");
   };
 
   if (loading) {
@@ -91,6 +95,7 @@ export default function CustomizedDataGrid() {
       <LogDetailsDialog
         selectedRow={selectedRow}
         onClose={handleCloseOverlay}
+        logMessage={selectLogMessage}
       />
     </>
   );
