@@ -7,23 +7,62 @@ import {
   Typography,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { useRecoilValue } from "recoil";
+import { userState } from "../utils/state";
+import chatApi from "../utils/api/chatApi";
 
-export default function Chat() {
-  const [messages, setMessages] = useState([
-    { id: 1, text: "Hello, how can I help you?", sender: "bot" },
-    { id: 2, text: "I need help analyzing my logs", sender: "user" },
-  ]);
-  const [newMessage, setNewMessage] = useState("");
+export default function Chat({ logId }) {
+  const user = useRecoilValue(userState);
   const messagesEndRef = useRef(null);
 
-  const handleSend = () => {
-    if (newMessage.trim()) {
-      setMessages([
-        ...messages,
-        { id: messages.length + 1, text: newMessage, sender: "user" },
-      ]);
-      setNewMessage("");
+  const [chatHistory, setChatHistory] = useState({});
+  const [newMessage, setNewMessage] = useState("");
+
+  const messages = useMemo(
+    () => chatHistory[logId] || [],
+    [chatHistory, logId]
+  );
+
+  const handleSend = async () => {
+    const userText = newMessage.trim();
+    if (!userText) return;
+
+    const userMsg = {
+      id: Date.now(),
+      text: userText,
+      sender: "user",
+    };
+
+    setChatHistory((prev) => ({
+      ...prev,
+      [logId]: [...(prev[logId] || []), userMsg],
+    }));
+
+    setNewMessage("");
+
+    try {
+      const response = await chatApi({ logId, userText, userId: user.id });
+      const botMsg = {
+        id: Date.now() + 1,
+        text: response.response || "No response from AI",
+        sender: "bot",
+      };
+
+      setChatHistory((prev) => ({
+        ...prev,
+        [logId]: [...(prev[logId] || []), userMsg, botMsg],
+      }));
+    } catch {
+      const errorMsg = {
+        id: Date.now() + 2,
+        text: "❌ Error fetching AI response.",
+        sender: "bot",
+      };
+      setChatHistory((prev) => ({
+        ...prev,
+        [logId]: [...(prev[logId] || []), errorMsg],
+      }));
     }
   };
 
@@ -32,14 +71,7 @@ export default function Chat() {
   }, [messages]);
 
   return (
-    <Stack
-      sx={{
-        p: 2,
-        height: "100%",
-        width: "100%",
-        justifyContent: "space-between",
-      }}
-    >
+    <Stack sx={{ p: 2, height: "100%", width: "100%" }}>
       <Paper
         elevation={3}
         sx={{
