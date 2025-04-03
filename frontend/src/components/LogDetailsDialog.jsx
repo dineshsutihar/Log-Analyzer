@@ -24,6 +24,8 @@ export default function LogDetailsDialog({ selectedRow, onClose, logMessage }) {
   if (!selectedRow) return null;
 
   const handleChatClick = () => {
+    console.log("Chat button clicked");
+    console.log("Selected Row:", selectedRow.id);
     setUserState({
       id: selectedRow.id,
       sender: "user",
