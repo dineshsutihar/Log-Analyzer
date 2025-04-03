@@ -1,28 +1,21 @@
 import { loadDefaultSync, GrokCollection } from 'grok-js';
 import readline from "readline";
 import { Readable } from "stream";
-import { type LinuxLogModelType } from "../models/LinuxLogModel";
+import { UnifiedLogModelType } from "../models/UnifiedLogModel";
 import { inferSeverity } from './severityInfer';
 
-
-
-// Define type for raw parsed fields
 interface GrokParseResult {
   timestamp?: string;
   userId?: string;
+  eventId?: string;
   message?: string;
+  fullMessage?: string;
 }
-
-// Add custom patterns safely
-const grokCollection = loadDefaultSync();
+const grokCollection: GrokCollection = loadDefaultSync();
 const customPatterns = {
-  // 'NOTSPACE': '\\S+',
   'USERNAME': '[a-zA-Z0-9._-]+',
   'KERNEL_EVENT': '[A-Za-z0-9_\\[\\]]+',
-  // 'AUDIT_HEADER': 'audit: type=%{NUMBER:audit_type} audit\\(%{NUMBER:audit_epoch}\\.%{NUMBER:audit_sequence}\\):',
-  // 'AUDIT_FIELD': '(\\w+="?[^"]*"?|\\w+=\\S+)',
-
-}
+};
 
 for (const [name, pattern] of Object.entries(customPatterns)) {
   grokCollection.createPattern(`${name} ${pattern}`);
@@ -37,14 +30,14 @@ const KERNEL_PATTERN = [
 
 const kernelParser = grokCollection.createPattern(KERNEL_PATTERN);
 
-export default async function parseKernelLogFile(data: string, source: string): Promise<LinuxLogModelType[]> {
+export default async function parseKernelLogFile(data: string, source: string): Promise<UnifiedLogModelType[]> {
+
   const logType = source.toLowerCase() === 'kernel.log' ? 'KERNEL' : 'SYSLOG';
-  const entries: LinuxLogModelType[] = [];
+  const entries: UnifiedLogModelType[] = [];
   const rl = readline.createInterface({
     input: Readable.from(data),
-    crlfDelay: Infinity
+    crlfDelay: Infinity,
   });
-
 
   for await (const line of rl) {
     if (!line.trim()) continue;
@@ -59,7 +52,7 @@ export default async function parseKernelLogFile(data: string, source: string): 
   return entries;
 }
 
-function createLogEntry(rawLine: string, parsed: GrokParseResult, logType: string): LinuxLogModelType | null {
+function createLogEntry(rawLine: string, parsed: GrokParseResult, logType: string): UnifiedLogModelType | null {
   if (!parsed.timestamp || !parsed.userId) {
     console.warn('Invalid log entry - missing timestamp or userId');
     return null;
@@ -68,39 +61,42 @@ function createLogEntry(rawLine: string, parsed: GrokParseResult, logType: strin
   const { eventId, message } = processMessageComponents(parsed);
 
   return {
-    logType: `${logType}` as "KERNEL" | "SYSLOG",
+    operatingSystem: "Linux",
+    logType: logType as "KERNEL" | "SYSLOG",
     timestamp: new Date(parsed.timestamp),
     severity: inferSeverity(message),
     eventId: eventId || 'NoEvent',
     message: message || 'No Description',
     userId: parsed.userId,
-    rawLine: rawLine
+    rawLine: rawLine,
+    uploadDate: new Date(),
+    analyzed: false,
   };
 }
 
-function processMessageComponents(parsed: any): { eventId: string, message: string } {
+function processMessageComponents(parsed: GrokParseResult): { eventId: string, message: string } {
   // Case 1: Structured message with event ID
   if (parsed.eventId && parsed.message) {
     return {
       eventId: parsed.eventId.trim(),
-      message: parsed.message.trim()
+      message: parsed.message.trim(),
     };
   }
 
-  // Case 2: Unstructured message
-  const rawMessage = parsed.fullMessage?.trim() || parsed.message?.trim() || '';
+  // Case 2: Unstructured message - attempt to split on the first colon.
+  const rawMessage = (parsed.fullMessage?.trim() || parsed.message?.trim() || '');
   const firstColonIndex = rawMessage.indexOf(':');
 
   if (firstColonIndex > -1) {
     return {
       eventId: rawMessage.substring(0, firstColonIndex).trim(),
-      message: rawMessage.substring(firstColonIndex + 1).trim()
+      message: rawMessage.substring(firstColonIndex + 1).trim(),
     };
   }
 
-  // Case 3: No discernible event ID
+  // Case 3: No discernible event ID; use raw message.
   return {
     eventId: 'NoEvent',
-    message: rawMessage
+    message: rawMessage,
   };
 }

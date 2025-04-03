@@ -1,5 +1,5 @@
 import { parse } from "csv-parse";
-import { WindowsLog } from "../models/LogWindowModel";
+import { UnifiedLogModelType } from "../models/UnifiedLogModel";
 
 function mapSeverity(level: string): "INFO" | "WARNING" | "ERROR" | "CRITICAL" {
   const levelMap: Record<string, "INFO" | "WARNING" | "ERROR" | "CRITICAL"> = {
@@ -11,7 +11,7 @@ function mapSeverity(level: string): "INFO" | "WARNING" | "ERROR" | "CRITICAL" {
   return levelMap[level] || "INFO";
 }
 
-export async function parseWindowsEventLogCsv(csvBuffer: Buffer): Promise<WindowsLog[]> {
+export async function parseWindowsEventLogCsv(csvBuffer: Buffer): Promise<UnifiedLogModelType[]> {
   return new Promise((resolve, reject) => {
     const columns = ["Level", "Date and Time", "Source", "Event ID", "Task Category", "Message"];
 
@@ -27,18 +27,29 @@ export async function parseWindowsEventLogCsv(csvBuffer: Buffer): Promise<Window
           return reject(new Error(`Error parsing CSV: ${error.message}`));
         }
 
-        const entries: WindowsLog[] = rows
-          .filter((_, i) => i !== 0)
-          .map((row) => ({
+        const validRows = rows.filter(row => row["Date and Time"] !== "Date and Time");
+
+        const entries: UnifiedLogModelType[] = validRows.map(row => {
+          let ts = new Date(row["Date and Time"]);
+          if (isNaN(ts.getTime())) {
+            console.warn(`Invalid date "${row["Date and Time"]}" - defaulting to current date`);
+            ts = new Date();
+          }
+
+          return {
+            operatingSystem: "Windows",
             severity: mapSeverity(row["Level"] || "Information"),
-            timestamp: new Date(row["Date and Time"] || ""),
-            source: row["Source"] || "",
+            timestamp: ts,
+            logType: "WINDOWS",
             eventId: Number(row["Event ID"]) || 0,
+            message: row["Message"] && row["Message"].trim() !== "" ? row["Message"].trim() : "No description provided",
+            rawLine: Object.values(row).join(", "),
+            source: row["Source"] || "",
             taskCategory: row["Task Category"] || "",
-            message: row["Message"] || "",
             uploadDate: new Date(),
             analyzed: false,
-          }));
+          };
+        });
 
         resolve(entries);
       }
