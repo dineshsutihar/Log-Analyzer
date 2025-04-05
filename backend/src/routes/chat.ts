@@ -19,29 +19,53 @@ const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
 const getSeverityPrompt = (line: string, userText?: string) => {
   const lower = line.toLowerCase();
-  let prompt: string;
+  let prompt: string = "You are a log analysis assistant for technical support. Your responses must be: \n"
+    // + "- Concise (2-5 sentences maximum) but if require the explanation then just give full answer there i\n
+    + "- Technically accurate\n"
+    + "- Action-oriented\n"
+    + "- Written in plain English (avoid technical jargon)\n"
+    + "- Structured with clear headings\n\n"
+    + "Analyze this log line and ";
+
+  const baseInstructions = "If uncertain, say 'I need more context to analyze this properly.'\n"
+    + "Format response with bold headings using markdown:\n"
+    + "**Analysis** | **Immediate Action** | **Prevention Steps**\n\n";
 
   if (lower.includes("error")) {
-    prompt = `This is an error log: "${line}". What caused this and how can we fix it? Provide a step-by-step fix if possible.`;
+    prompt += `diagnose this ERROR log: "${line}"\n\n`
+      + "1. Identify the most likely specific component/system causing this\n"
+      + "2. Provide exact fix steps (max 3 steps)\n"
+      + "3. List prevention measures (max 2 items)";
   } else if (lower.includes("info")) {
-    prompt = `This is an informational log: "${line}". Why did this happen, and how can we improve our system to avoid this in future?`;
+    prompt += `explain this INFO log: "${line}"\n\n`
+      + "1. Context: Why this occurs in 1 sentence\n"
+      + "2. System improvement suggestion (1 item)\n"
+      + "3. Example scenario where this matters";
   } else {
-    prompt = `Here is a log line: "${line}". Can you explain what it might mean and whether any action is required?`;
+    prompt += `interpret this log: "${line}"\n\n`
+      + "1. Brief meaning explanation\n"
+      + "2. Action required? (Yes/No with reason)\n"
+      + "3. When to seek more help";
   }
 
   if (userText) {
-    prompt += `\nUser's additional question: "${userText}"`;
+    prompt += `\n\nUser Priority: Address this specific concern - "${userText}"\n`
+      + "Response must directly answer this first";
   }
-  prompt += `\n\nPlease provide a detailed analysis of the log and fix if required and give answer in step wise. and answer should be in a simple language which can be easy to understand and also don't give too long response give accurate and point to point.`;
+
+  prompt += `\n\n${baseInstructions}`
+    + "Keep bullet points to 3 items maximum per section.\n"
+    + "Total response length must not exceed 150 words.\n"
+    + "Never suggest undocumented solutions.";
 
   return prompt;
 };
 
 router.post('/chat', async (req: Request, res: Response): Promise<void> => {
   const { logId, userText } = req.body;
-
   if (!logId) {
     res.status(400).json({ error: "logId is required." });
+    return;
   }
 
   try {
