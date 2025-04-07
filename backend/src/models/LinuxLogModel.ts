@@ -9,17 +9,20 @@ interface LinuxLogModelType {
   processId?: number | string;
   userId?: string;
   rawLine: string;
+  analyzed?: boolean;
+  uploadDate?: Date;
+  users?: string;
 }
 
 const LinuxLogSchema = new Schema<LinuxLogModelType & Document>({
-  logType: { 
-    type: String, 
+  logType: {
+    type: String,
     validate: {
-      validator: function(v: string) {
+      validator: function (v: string) {
         return ["SYSLOG", "AUTH", "KERNEL", "APPLICATION", "UNKNOWN"].includes(v) || v.startsWith("UNKNOWN-");
       }
     },
-    required: true 
+    required: true
   },
   timestamp: { type: Date, required: true },
   severity: { type: String, enum: ["INFO", "WARNING", "ERROR", "CRITICAL"], required: true },
@@ -27,6 +30,9 @@ const LinuxLogSchema = new Schema<LinuxLogModelType & Document>({
   message: { type: String, required: true },
   processId: { type: Schema.Types.Mixed },
   userId: { type: String },
+  analyzed: { type: Boolean, default: false },
+  uploadDate: { type: Date, default: Date.now },
+  users: { type: String },
   rawLine: { type: String, required: true },
 });
 
