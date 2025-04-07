@@ -7,10 +7,13 @@ import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import InsightsRoundedIcon from "@mui/icons-material/InsightsRounded";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
+import { useRecoilState } from "recoil";
+import { activeViewState } from "../utils/state";
 
 export default function HighlightedCard() {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const [_, setActiveViewState] = useRecoilState(activeViewState);
 
   return (
     <Card sx={{ height: "100%" }}>
@@ -33,6 +36,9 @@ export default function HighlightedCard() {
           color="primary"
           endIcon={<ChevronRightRoundedIcon />}
           fullWidth={isSmallScreen}
+          onClick={() => {
+            setActiveViewState("chat");
+          }}
         >
           Get insights
         </Button>
