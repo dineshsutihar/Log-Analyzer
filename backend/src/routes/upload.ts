@@ -4,6 +4,7 @@ import { parseAllLinuxLog } from "../utils/logParser";
 import { parseWindowsEventLogCsv } from "../utils/parse-window";
 import { WindowsLogModel } from "../models/LogWindowModel";
 import { LinuxLogModel, LinuxLogModelType } from "../models/LinuxLogModel";
+import UnifiedLogModel, { UnifiedLogModelType } from "../models/UnifiedLogModel";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -22,10 +23,10 @@ router.post("/upload", upload.single("logfile"), async (req: Request, res: Respo
   try {
     if (fileName.endsWith(".csv")) {
       let logDocument = await parseWindowsEventLogCsv(fileBuffer);
-      await WindowsLogModel.insertMany(logDocument);
+      await UnifiedLogModel.insertMany(logDocument);
     } else if (fileName.endsWith(".log")) {
-      const parseResult: LinuxLogModelType[] = await parseAllLinuxLog(fileBuffer.toString(), source);
-      await LinuxLogModel.insertMany(parseResult);
+      const parseResult: UnifiedLogModelType[] = await parseAllLinuxLog(fileBuffer.toString(), source);
+      await UnifiedLogModel.insertMany(parseResult);
     } else {
       res.status(400).json({ error: "Unsupported file type" });
       return;

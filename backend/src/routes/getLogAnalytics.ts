@@ -1,18 +1,19 @@
 import express from 'express';
 import { Request, Response } from 'express';
-import { LinuxLogModel } from '../models/LinuxLogModel';
+import UnifiedLogModel from '../models/UnifiedLogModel';
 
 const router = express.Router();
 
 router.get('/getLogAnalytics', async (req: Request, res: Response) => {
   try {
-    const logs = await LinuxLogModel.find({}).sort({ timestamp: -1 }).limit(1000); // Fetch the latest 10 logs
+
+    const logs = await UnifiedLogModel.find({}).sort({ timestamp: -1 }).limit(1000); // Fetch the latest 1000 logs
 
     const rows = logs.map(log => ({
       id: log._id,
       timeStamp: log.timestamp.toUTCString(),
       severity: log.severity,
-      users: log.users ? log.users : "N/A",
+      users: log.users ? log.users : "guest",
       rawLine: log.rawLine,
       message: log.message,
       uploadDate: log.uploadDate ? log.uploadDate.toISOString() : null,
@@ -20,7 +21,6 @@ router.get('/getLogAnalytics', async (req: Request, res: Response) => {
       EventId: log.eventId,
       logType: log.logType,
     }));
-
     res.json(rows);
 
   } catch (error) {

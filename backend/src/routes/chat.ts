@@ -1,13 +1,14 @@
 import express from 'express';
 import { Request, Response } from 'express';
-import { LinuxLogModel } from '../models/LinuxLogModel';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from 'dotenv';
+import UnifiedLogModel from '../models/UnifiedLogModel';
 
 dotenv.config();
 
 const router = express.Router();
 router.use(express.json());
+router.use(express.urlencoded({ extended: true }));
 
 if (!process.env.GOOGLE_API_KEY) {
   throw new Error('Missing GOOGLE_API_KEY in environment variables');
@@ -31,31 +32,27 @@ const getSeverityPrompt = (line: string, userText?: string) => {
   if (userText) {
     prompt += `\nUser's additional question: "${userText}"`;
   }
-  prompt += `\n\nPlease provide a detailed analysis of the log and give answer in step wise. and your answer should not exceed more than 500 words.`;
+  prompt += `\n\nPlease provide a detailed analysis of the log and fix if required and give answer in step wise. and answer should be in a simple language which can be easy to understand and also don't give too long response give accurate and point to point.`;
 
   return prompt;
 };
 
 router.post('/chat', async (req: Request, res: Response): Promise<void> => {
-  console.log("Received request body:", req.body);
   const { logId, userText } = req.body;
-  console.log("Received logId:", logId);
-  console.log("Received userText:", userText);
 
   if (!logId) {
-    console.log("logId is missing in the request body.");
     res.status(400).json({ error: "logId is required." });
   }
 
   try {
-    const rowLog = await LinuxLogModel.findById(logId);
+    const rowLog = await UnifiedLogModel.findById({ _id: logId });
 
     if (!rowLog) {
       res.status(404).json({ error: "Log not found." });
       return;
     }
 
-    const prompt = getSeverityPrompt(rowLog.rawLine, userText);
+    const prompt = getSeverityPrompt(rowLog.rawLine || "", userText);
     const response = await model.generateContent(prompt);
     const generatedText = response.response.text();
 

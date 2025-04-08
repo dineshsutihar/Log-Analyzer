@@ -1,6 +1,7 @@
 import express from 'express';
 import { Request, Response } from 'express';
 import { LinuxLogModel } from '../models/LinuxLogModel';
+import UnifiedLogModel from '../models/UnifiedLogModel';
 
 const router = express.Router();
 
@@ -9,7 +10,7 @@ router.get('/stats', async (req: Request, res: Response) => {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 90); // 90 days ago
 
-    const totalLogsAgg = await LinuxLogModel.aggregate([
+    const totalLogsAgg = await UnifiedLogModel.aggregate([
       {
         $match: { timestamp: { $gte: startDate } }
       },
@@ -32,7 +33,7 @@ router.get('/stats', async (req: Request, res: Response) => {
       }
     ]);
 
-    const errorLogsAgg = await LinuxLogModel.aggregate([
+    const errorLogsAgg = await UnifiedLogModel.aggregate([
       {
         $match: {
           timestamp: { $gte: startDate },
@@ -58,7 +59,7 @@ router.get('/stats', async (req: Request, res: Response) => {
       }
     ]);
 
-    const warningLogsAgg = await LinuxLogModel.aggregate([
+    const warningLogsAgg = await UnifiedLogModel.aggregate([
       {
         $match: {
           timestamp: { $gte: startDate },

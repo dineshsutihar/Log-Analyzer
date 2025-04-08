@@ -1,16 +1,17 @@
 import express from 'express';
 import { Request, Response } from 'express';
 import { LinuxLogModel } from '../models/LinuxLogModel';
+import UnifiedLogModel from '../models/UnifiedLogModel';
 
 const router = express.Router();
 
 router.get('/logtypeStatus', async (req: Request, res: Response) => {
   try {
-    const syslogCount = await LinuxLogModel.countDocuments({ logType: 'SYSLOG' });
-    const windowlogCount = await LinuxLogModel.countDocuments({ logType: 'WINDOWLOG' });
-    const authlogCount = await LinuxLogModel.countDocuments({ logType: 'AUTH' });
-    const kernelCount = await LinuxLogModel.countDocuments({ logType: 'KERNEL' });
-    const unknownCount = await LinuxLogModel.countDocuments({ logType: { $regex: 'UNKNOWN' } });
+    const syslogCount = await UnifiedLogModel.countDocuments({ logType: 'SYSLOG' });
+    const windowlogCount = await UnifiedLogModel.countDocuments({ logType: 'WINDOWS' });
+    const authlogCount = await UnifiedLogModel.countDocuments({ logType: 'AUTH' });
+    const kernelCount = await UnifiedLogModel.countDocuments({ logType: 'KERNEL' });
+    const unknownCount = await UnifiedLogModel.countDocuments({ logType: { $regex: 'UNKNOWN' } });
 
     const data = [
       { label: "SYSLOG", value: syslogCount },
