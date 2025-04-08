@@ -8,6 +8,7 @@ import logtypeStatus from './routes/logTypeStatus';
 import connectToDatabase from './db/connect';
 import severityInfo from './routes/severityInfo';
 import getLogAnalytics from './routes/getLogAnalytics';
+import chatRouter from './routes/chat';
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use('/api', getStats)
 app.use('/api', logtypeStatus)
 app.use('/api', severityInfo)
 app.use('/api', getLogAnalytics)
+app.use('/api', chatRouter)
 
 app.listen(PORT, (): void => {
   console.log(`Server is running on http://localhost:${PORT}`);
