@@ -7,8 +7,10 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import MenuContent from "./MenuContent";
+import { UserButton, useUser } from "@clerk/clerk-react";
 
 export default function SideMenuMobile({ open, toggleDrawer }) {
+  const { user } = useUser();
   return (
     <Drawer
       anchor="right"
@@ -33,15 +35,15 @@ export default function SideMenuMobile({ open, toggleDrawer }) {
             direction="row"
             sx={{ gap: 1, alignItems: "center", flexGrow: 1, p: 1 }}
           >
-            <Avatar
-              sizes="small"
-              alt="Dinesh Sutihar"
-              src="https://i.pravatar.cc/300"
-              sx={{ width: 24, height: 24 }}
-            />
-            <Typography component="p" variant="h6">
-              Dinesh Sutihar
-            </Typography>
+            <UserButton />
+            <Stack sx={{ flexGrow: 1 }}>
+              <Typography variant="body2" sx={{ fontWeight: "500" }}>
+                {user?.fullName || user?.primaryEmailAddress?.emailAddress}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {user?.primaryEmailAddress?.emailAddress}
+              </Typography>
+            </Stack>
           </Stack>
         </Stack>
         <Divider />
