@@ -106,7 +106,7 @@ const Upload = () => {
       formData.append("source", osType === "linux" ? linuxLogType : "csv");
 
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api//upload`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/upload`,
         {
           method: "POST",
           body: formData,
