@@ -17,8 +17,8 @@ const items = [
     title: "AI-Powered Insights",
     description:
       "Automatically analyzes logs and CSV files, providing instant error highlights and suggested solutions.",
-    imageLight: `url("${"https://mui.com"}/static/images/templates/templates-images/dash-light.png")`,
-    imageDark: `url("${"https://mui.com"}/static/images/templates/templates-images/dash-dark.png")`,
+    imageLight: `url("../assets/dash-light.png")`,
+    imageDark: `url("../assets//dash-dark.png")`,
   },
   {
     icon: <EdgesensorHighRoundedIcon />,
