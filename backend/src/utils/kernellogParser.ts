@@ -61,6 +61,7 @@ function createLogEntry(rawLine: string, parsed: GrokParseResult, logType: strin
   const { eventId, message } = processMessageComponents(parsed);
 
   return {
+    ownerId: '', // This will be set later when saving to the database
     operatingSystem: "Linux",
     logType: logType as "KERNEL" | "SYSLOG",
     timestamp: new Date(parsed.timestamp),

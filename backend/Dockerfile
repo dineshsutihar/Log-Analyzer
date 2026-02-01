@@ -1,20 +1,25 @@
-FROM node:22-alpine
+FROM node:22-bullseye-slim
 
 WORKDIR /app
 
-# Install necessary dependencies, including git
-RUN apk add --no-cache python3 py3-pip make g++ git
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+     python3 \
+     build-essential \
+     ca-certificates \
+     curl \
+     git \
+  && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
 
 RUN npm install -g typescript nodemon
 
-RUN npm install
+RUN npm ci --unsafe-perm --build-from-source --loglevel=info
 
 COPY . .
 
 EXPOSE 3000
-
 ENV MONGODB_URI=mongodb://db:27017/loganalyzer
 
 CMD ["npm", "run", "dev"]

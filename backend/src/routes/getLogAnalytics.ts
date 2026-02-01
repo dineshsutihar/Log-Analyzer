@@ -1,15 +1,18 @@
-import express from 'express';
-import { Request, Response } from 'express';
-import UnifiedLogModel from '../models/UnifiedLogModel';
+import express from "express";
+import { Request, Response } from "express";
+import UnifiedLogModel from "../models/UnifiedLogModel";
 
 const router = express.Router();
 
-router.get('/getLogAnalytics', async (req: Request, res: Response) => {
+router.get("/getLogAnalytics", async (req: Request, res: Response) => {
   try {
+    console.log("Fetching log analytics...");
+    const { userId } = req.auth; 
+    const logs = await UnifiedLogModel.find({ ownerId: userId })
+      .sort({ timestamp: -1 })
+      .limit(1000); // Fetch the latest 1000 logs
 
-    const logs = await UnifiedLogModel.find({}).sort({ timestamp: -1 }).limit(1000); // Fetch the latest 1000 logs
-
-    const rows = logs.map(log => ({
+    const rows = logs.map((log) => ({
       id: log._id,
       timeStamp: log.timestamp.toUTCString(),
       severity: log.severity,
@@ -22,16 +25,10 @@ router.get('/getLogAnalytics', async (req: Request, res: Response) => {
       logType: log.logType,
     }));
     res.json(rows);
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Something went wrong." });
   }
 });
 
-
-
 export default router;
-
-
-

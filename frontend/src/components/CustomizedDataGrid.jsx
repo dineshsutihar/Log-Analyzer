@@ -3,6 +3,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { columns } from "./internals/data/gridData";
 import fetchAllLogs from "../utils/api/fetchLogAnalytics";
 import LogDetailsDialog from "./LogDetailsDialog";
+import { useAuth } from "@clerk/clerk-react";
 
 export default function CustomizedDataGrid() {
   const [rows, setRows] = React.useState([]);
@@ -12,11 +13,13 @@ export default function CustomizedDataGrid() {
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [selectLogMessage, setSelectLogMessage] =
     React.useState("No data available");
+  const { getToken } = useAuth();
 
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await fetchAllLogs();
+        const token = await getToken();
+        const data = await fetchAllLogs(token);
         if (!data) {
           throw new Error("No data found");
         }

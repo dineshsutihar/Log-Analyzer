@@ -1,90 +1,89 @@
-import express from 'express';
-import { Request, Response } from 'express';
-import { LinuxLogModel } from '../models/LinuxLogModel';
-import UnifiedLogModel from '../models/UnifiedLogModel';
+import express from "express";
+import { Request, Response } from "express";
+import { LinuxLogModel } from "../models/LinuxLogModel";
+import UnifiedLogModel from "../models/UnifiedLogModel";
 
 const router = express.Router();
 
-router.get('/stats', async (req: Request, res: Response) => {
+router.get("/stats", async (req: Request, res: Response) => {
   try {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 90); // 90 days ago
 
     const totalLogsAgg = await UnifiedLogModel.aggregate([
       {
-        $match: { timestamp: { $gte: startDate } }
+        $match: { timestamp: { $gte: startDate }, ownerId: req.auth.userId },
       },
       {
         $group: {
           _id: {
-            year: { $year: '$timestamp' },
-            month: { $month: '$timestamp' },
-            day: { $dayOfMonth: '$timestamp' },
+            year: { $year: "$timestamp" },
+            month: { $month: "$timestamp" },
+            day: { $dayOfMonth: "$timestamp" },
           },
           count: { $sum: 1 },
-        }
+        },
       },
       {
         $sort: {
           "_id.year": 1,
           "_id.month": 1,
           "_id.day": 1,
-        }
-      }
+        },
+      },
     ]);
 
     const errorLogsAgg = await UnifiedLogModel.aggregate([
       {
         $match: {
           timestamp: { $gte: startDate },
-          severity: { $in: ['ERROR'] }
+          severity: { $in: ["ERROR"] },
         },
       },
       {
         $group: {
           _id: {
-            year: { $year: '$timestamp' },
-            month: { $month: '$timestamp' },
-            day: { $dayOfMonth: '$timestamp' },
+            year: { $year: "$timestamp" },
+            month: { $month: "$timestamp" },
+            day: { $dayOfMonth: "$timestamp" },
           },
           count: { $sum: 1 },
-        }
+        },
       },
       {
         $sort: {
           "_id.year": 1,
           "_id.month": 1,
           "_id.day": 1,
-        }
-      }
+        },
+      },
     ]);
 
     const warningLogsAgg = await UnifiedLogModel.aggregate([
       {
         $match: {
           timestamp: { $gte: startDate },
-          severity: { $in: ['WARNING'] } // Adjust this based on your severity levels
+          severity: { $in: ["WARNING"] }, // Adjust this based on your severity levels
         },
       },
       {
         $group: {
           _id: {
-            year: { $year: '$timestamp' },
-            month: { $month: '$timestamp' },
-            day: { $dayOfMonth: '$timestamp' },
+            year: { $year: "$timestamp" },
+            month: { $month: "$timestamp" },
+            day: { $dayOfMonth: "$timestamp" },
           },
           count: { $sum: 1 },
-        }
+        },
       },
       {
         $sort: {
           "_id.year": 1,
           "_id.month": 1,
           "_id.day": 1,
-        }
-      }
+        },
+      },
     ]);
-
 
     // Format Helper to build a 90 days array
     const totalLogsData = buildDailyArray(totalLogsAgg, startDate);
@@ -94,14 +93,15 @@ router.get('/stats', async (req: Request, res: Response) => {
     // sum up total logs
     const totalLogsSum = totalLogsData.reduce((acc, count) => acc + count, 0);
     const errorLogsSum = errorLogsData.reduce((acc, count) => acc + count, 0);
-    const warningLogsSum = warningLogsData.reduce((acc, count) => acc + count, 0);
+    const warningLogsSum = warningLogsData.reduce(
+      (acc, count) => acc + count,
+      0
+    );
 
-    //compute tends 
+    //compute tends
     const totalLogsTend = computeTrend(totalLogsData);
     const errorLogsTend = computeTrend(errorLogsData);
     const warningLogsTend = computeTrend(warningLogsData);
-
-
 
     res.json([
       {
@@ -125,10 +125,7 @@ router.get('/stats', async (req: Request, res: Response) => {
         trend: warningLogsTend,
         data: warningLogsData,
       },
-    ])
-
-
-
+    ]);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Something went wrong." });
@@ -136,7 +133,10 @@ router.get('/stats', async (req: Request, res: Response) => {
 });
 
 function buildDailyArray(
-  aggResults: { _id: { year: number; month: number; day: number }; count: number }[],
+  aggResults: {
+    _id: { year: number; month: number; day: number };
+    count: number;
+  }[],
   startDate: Date
 ): number[] {
   const daysCount = 90;
@@ -144,8 +144,10 @@ function buildDailyArray(
 
   for (const doc of aggResults) {
     const { year, month, day } = doc._id;
-    const thisDate = new Date(year, month - 1, day); // month is 0-indexed 
-    const index = Math.floor((thisDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    const thisDate = new Date(year, month - 1, day); // month is 0-indexed
+    const index = Math.floor(
+      (thisDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
 
     if (index >= 0 && index < daysCount) {
       dailyArray[index] = doc.count;
@@ -154,7 +156,6 @@ function buildDailyArray(
 
   return dailyArray;
 }
-
 
 function computeTrend(data: number[]) {
   if (data.length < 2) return "neutral";
@@ -171,8 +172,4 @@ function computeTrend(data: number[]) {
   }
 }
 
-
 export default router;
-
-
-

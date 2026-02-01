@@ -31,6 +31,7 @@ export default async function parseAuthLogFile(data: string): Promise<UnifiedLog
     const parsedEntry = grokPatter.parseSync(line);
 
     const entry: UnifiedLogModelType = {
+      ownerId: '', // This will be set later when saving to the database
       operatingSystem: "Linux",
       logType: 'AUTH',
       timestamp: new Date(parsedEntry.timestamp || ''),

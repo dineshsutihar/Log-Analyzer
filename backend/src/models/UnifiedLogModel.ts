@@ -3,6 +3,8 @@ import mongoose, { Document, Schema } from "mongoose";
 type OperatingSystem = "Linux" | "Windows";
 
 export interface UnifiedLogModelType {
+  ownerId: string;
+
   operatingSystem: OperatingSystem;
 
   severity: "INFO" | "WARNING" | "ERROR" | "CRITICAL";
@@ -24,6 +26,10 @@ export interface UnifiedLogModelType {
 }
 
 const UnifiedLogSchema = new Schema<UnifiedLogModelType & Document>({
+  ownerId: {
+    type: String,
+    required: true,
+  },
   operatingSystem: {
     type: String,
     enum: ["Linux", "Windows"],

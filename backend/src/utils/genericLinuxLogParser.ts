@@ -19,6 +19,7 @@ export default async function parseGenericLogs(data: string, source: string): Pr
     const parsedEntry = grokPatter.parseSync(line);
 
     const entry: UnifiedLogModelType = {
+      ownerId: '', 
       operatingSystem: "Linux",
 
       severity: inferSeverity(parsedEntry.message),

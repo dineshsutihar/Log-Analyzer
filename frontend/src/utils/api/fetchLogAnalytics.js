@@ -1,7 +1,13 @@
-export default async function fetchAllLogs() {
-  const data = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/getLogAnalytics`)
-    
-  if(!data.ok) {
+export default async function fetchAllLogs(token) {
+  const data = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/getLogAnalytics`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    }
+  })
+
+  if (!data.ok) {
     throw new Error("Network response was not ok" + data.statusText);
   }
 

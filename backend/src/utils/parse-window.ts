@@ -37,6 +37,7 @@ export async function parseWindowsEventLogCsv(csvBuffer: Buffer): Promise<Unifie
           }
 
           return {
+            ownerId: '', // This will be set later when saving to the database
             operatingSystem: "Windows",
             severity: mapSeverity(row["Level"] || "Information"),
             timestamp: ts,

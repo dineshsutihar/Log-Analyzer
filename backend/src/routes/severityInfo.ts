@@ -1,12 +1,11 @@
-import express from 'express';
-import { Request, Response } from 'express';
-import UnifiedLogModel from '../models/UnifiedLogModel';
+import express from "express";
+import { Request, Response } from "express";
+import UnifiedLogModel from "../models/UnifiedLogModel";
 
 const router = express.Router();
 
-router.get('/severityInfo', async (req: Request, res: Response) => {
+router.get("/severityInfo", async (req: Request, res: Response) => {
   try {
-
     const info = [0, 0, 0, 0, 0, 0, 0];
     const warning = [0, 0, 0, 0, 0, 0, 0];
     const error = [0, 0, 0, 0, 0, 0, 0];
@@ -25,23 +24,27 @@ router.get('/severityInfo', async (req: Request, res: Response) => {
       monthEnd.setHours(23, 59, 59, 999);
 
       info[6 - i] = await UnifiedLogModel.countDocuments({
-        severity: 'INFO',
-        timestamp: { $gte: monthStart, $lte: monthEnd }
+        severity: "INFO",
+        timestamp: { $gte: monthStart, $lte: monthEnd },
+        ownerId: req.auth.userId,
       });
 
       warning[6 - i] = await UnifiedLogModel.countDocuments({
-        severity: 'WARNING',
-        timestamp: { $gte: monthStart, $lte: monthEnd }
+        severity: "WARNING",
+        timestamp: { $gte: monthStart, $lte: monthEnd },
+        ownerId: req.auth.userId,
       });
 
       error[6 - i] = await UnifiedLogModel.countDocuments({
-        severity: 'ERROR',
-        timestamp: { $gte: monthStart, $lte: monthEnd }
+        severity: "ERROR",
+        timestamp: { $gte: monthStart, $lte: monthEnd },
+        ownerId: req.auth.userId,
       });
 
       critical[6 - i] = await UnifiedLogModel.countDocuments({
-        severity: 'CRITICAL',
-        timestamp: { $gte: monthStart, $lte: monthEnd }
+        severity: "CRITICAL",
+        timestamp: { $gte: monthStart, $lte: monthEnd },
+        ownerId: req.auth.userId,
       });
     }
 
@@ -52,16 +55,10 @@ router.get('/severityInfo', async (req: Request, res: Response) => {
       error,
       critical,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Something went wrong." });
   }
 });
 
-
-
 export default router;
-
-
-
