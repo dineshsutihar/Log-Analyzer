@@ -40,7 +40,7 @@ function AreaGradient({ color, id }) {
   );
 }
 
-export default function StatCard({ title, value, interval, trend, data }) {
+export default function StatCard({ title, value, interval, trend, trendPercentage, data }) {
   const theme = useTheme();
   const daysInWeek = getDaysInMonth();
   const trendColors = {
@@ -66,7 +66,6 @@ export default function StatCard({ title, value, interval, trend, data }) {
 
   const color = labelColors[trend];
   const chartColor = trendColors[trend];
-  const trendValues = { up: "+25%", down: "-25%", neutral: "+5%" };
 
   return (
     <Card variant="outlined" sx={{ height: "100%", flexGrow: 1 }}>
@@ -86,7 +85,7 @@ export default function StatCard({ title, value, interval, trend, data }) {
               <Typography variant="h4" component="p">
                 {value}
               </Typography>
-              <Chip size="small" color={color} label={trendValues[trend]} />
+              <Chip size="small" color={color} label={trendPercentage || "0%"} />
             </Stack>
             <Typography variant="caption" sx={{ color: "text.secondary" }}>
               {interval}

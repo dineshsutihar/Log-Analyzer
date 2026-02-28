@@ -14,22 +14,18 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import ChatIcon from "@mui/icons-material/Chat";
 import { useRecoilState } from "recoil";
-import { userState } from "../utils/state";
-import { activeViewState } from "../utils/state";
+import { chatLogState, activeViewState } from "../utils/state";
 
 export default function LogDetailsDialog({ selectedRow, onClose, logMessage }) {
   const [, setViewState] = useRecoilState(activeViewState);
-  const [, setUserState] = useRecoilState(userState);
+  const [, setChatLog] = useRecoilState(chatLogState);
 
   if (!selectedRow) return null;
 
   const handleChatClick = () => {
-    console.log("Chat button clicked");
-    console.log("Selected Row:", selectedRow.id);
-    setUserState({
+    setChatLog({
       id: selectedRow.id,
-      sender: "user",
-      logMessage: logMessage,
+      message: logMessage,
     });
     setViewState("chat");
   };

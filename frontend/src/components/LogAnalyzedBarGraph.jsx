@@ -72,8 +72,16 @@ export default function LogAnalyzedBarChart() {
           .reduce((sum, val) => sum + val, 0);
         setTotalLogs(total);
 
-        if (response.percentageChange !== undefined) {
-          setPercentageChange(response.percentageChange);
+        // Compute percentage change: compare last 2 months
+        const allArrays = [response.info, response.warning, response.error, response.critical];
+        if (allArrays[0] && allArrays[0].length >= 2) {
+          const lastMonth = allArrays.reduce((sum, arr) => sum + (arr[arr.length - 1] || 0), 0);
+          const prevMonth = allArrays.reduce((sum, arr) => sum + (arr[arr.length - 2] || 0), 0);
+          if (prevMonth > 0) {
+            setPercentageChange(Math.round(((lastMonth - prevMonth) / prevMonth) * 100));
+          } else if (lastMonth > 0) {
+            setPercentageChange(100);
+          }
         }
       } catch (error) {
         console.error("Error fetching log data:", error);
@@ -108,8 +116,8 @@ export default function LogAnalyzedBarChart() {
             </Typography>
             <Chip
               size="small"
-              color="success"
-              label={`+${percentageChange}%`}
+              color={percentageChange >= 0 ? "success" : "error"}
+              label={`${percentageChange >= 0 ? "+" : ""}${percentageChange}%`}
             />
           </Stack>
           <Typography variant="caption" sx={{ color: "text.secondary" }}>

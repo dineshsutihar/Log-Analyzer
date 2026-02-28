@@ -12,6 +12,7 @@ import {
   ToggleButton,
   Chip,
   Alert,
+  Badge,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -19,10 +20,12 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import DescriptionIcon from "@mui/icons-material/Description";
 import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
+import SearchIcon from "@mui/icons-material/Search";
+import CloseIcon from "@mui/icons-material/Close";
 import { useEffect, useRef, useState, useMemo } from "react";
-import { useRecoilValue } from "recoil";
-import { userState } from "../utils/state";
-import chatApi, { chatSystemApi } from "../utils/api/chatApi";
+import { useRecoilState } from "recoil";
+import { chatLogState } from "../utils/state";
+import chatApi, { chatSystemApi, chatQueryApi } from "../utils/api/chatApi";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -37,23 +40,36 @@ const SYSTEM_SUGGESTIONS = [
   "Are there any recurring issues I should fix?",
 ];
 
+const QUERY_SUGGESTIONS = [
+  "Show me all authentication failures",
+  "Find errors from today",
+  "What happened with disk space?",
+  "Any timeout or connection errors?",
+  "Show critical events this week",
+  "Find logs about memory usage",
+];
+
 export default function Chat() {
   const theme = useTheme();
-  const user = useRecoilValue(userState);
+  const [chatLog, setChatLog] = useRecoilState(chatLogState);
   const { getToken } = useAuth();
-  const logId = user.id;
-  const logMessage = user.logMessage || "";
   const messagesEndRef = useRef(null);
 
-  // Two modes: "log" (single log context) or "system" (system-wide)
-  const [mode, setMode] = useState(logMessage ? "log" : "system");
+  // Three modes: "system" | "query" | "log"
+  const [mode, setMode] = useState(chatLog ? "log" : "system");
   const [chatHistory, setChatHistory] = useState({});
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [lastUserText, setLastUserText] = useState("");
+  const [copiedId, setCopiedId] = useState(null);
 
-  // Use different chat key per mode
-  const chatKey = mode === "log" ? `log-${logId}` : "system";
+  // Chat key per mode for separate histories
+  const chatKey = useMemo(() => {
+    if (mode === "log" && chatLog) return `log-${chatLog.id}`;
+    if (mode === "query") return "query";
+    return "system";
+  }, [mode, chatLog]);
+
   const messages = useMemo(
     () => chatHistory[chatKey] || [],
     [chatHistory, chatKey]
@@ -67,12 +83,21 @@ export default function Chat() {
     scrollToBottom();
   }, [messages]);
 
-  // When user navigates from a log detail, auto-switch to log mode
+  // When a log is selected from DataGrid, auto-switch to log mode
   useEffect(() => {
-    if (logMessage && logId) {
+    if (chatLog) {
       setMode("log");
     }
-  }, [logMessage, logId]);
+  }, [chatLog]);
+
+  const handleModeChange = (_, val) => {
+    if (val) setMode(val);
+  };
+
+  const handleClearLogContext = () => {
+    setChatLog(null);
+    setMode("system");
+  };
 
   const handleSend = async (regenerateText = null) => {
     const text = (regenerateText || newMessage).trim();
@@ -103,13 +128,24 @@ export default function Chat() {
 
       if (mode === "system") {
         response = await chatSystemApi(text, token);
+      } else if (mode === "query") {
+        response = await chatQueryApi(text, token);
       } else {
-        response = await chatApi({ logId, userText: text }, token);
+        response = await chatApi(
+          { logId: chatLog?.id, userText: text },
+          token
+        );
       }
+
+      const botText = response.response || "No response";
+      const extra =
+        mode === "query" && response.matchCount !== undefined
+          ? `\n\n---\n*Found ${response.matchCount} matching log(s)*`
+          : "";
 
       const botMsg = {
         id: Date.now() + 1,
-        text: response.response || "No response",
+        text: botText + extra,
         sender: "bot",
         timestamp: new Date().toLocaleTimeString(),
       };
@@ -136,12 +172,48 @@ export default function Chat() {
     setIsLoading(false);
   };
 
-  const copyToClipboard = (text) => {
+  const copyToClipboard = (text, id) => {
     navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   const handleSuggestionClick = (suggestion) => {
     setNewMessage(suggestion);
+  };
+
+  const getModeDescription = () => {
+    switch (mode) {
+      case "system":
+        return "Ask about overall system health, trends, and recommendations";
+      case "query":
+        return "Search through your logs — ask about specific events, errors, or services";
+      case "log":
+        return chatLog
+          ? "Analyzing a specific log entry"
+          : "Select a log from Analytics to use this mode";
+      default:
+        return "";
+    }
+  };
+
+  const getPlaceholder = () => {
+    switch (mode) {
+      case "system":
+        return "Ask about system health, error trends, recommendations...";
+      case "query":
+        return 'Search your logs — e.g. "show me authentication failures today"';
+      case "log":
+        return "Ask about this specific log entry...";
+      default:
+        return "Type a message...";
+    }
+  };
+
+  const getSuggestions = () => {
+    if (mode === "system") return SYSTEM_SUGGESTIONS;
+    if (mode === "query") return QUERY_SUGGESTIONS;
+    return [];
   };
 
   return (
@@ -156,31 +228,57 @@ export default function Chat() {
         <ToggleButtonGroup
           value={mode}
           exclusive
-          onChange={(_, val) => val && setMode(val)}
+          onChange={handleModeChange}
           size="small"
         >
           <ToggleButton value="system">
             <MonitorHeartIcon sx={{ mr: 0.5 }} fontSize="small" />
-            System Analysis
+            System
           </ToggleButton>
-          <ToggleButton value="log" disabled={!logMessage}>
-            <DescriptionIcon sx={{ mr: 0.5 }} fontSize="small" />
-            Log Analysis
+          <ToggleButton value="query">
+            <SearchIcon sx={{ mr: 0.5 }} fontSize="small" />
+            Ask Logs
+          </ToggleButton>
+          <ToggleButton value="log" disabled={!chatLog}>
+            <Badge
+              color="primary"
+              variant="dot"
+              invisible={!chatLog}
+              sx={{ mr: 0.5 }}
+            >
+              <DescriptionIcon fontSize="small" />
+            </Badge>
+            <Box component="span" sx={{ ml: 0.5 }}>
+              Log Detail
+            </Box>
           </ToggleButton>
         </ToggleButtonGroup>
 
-        {mode === "system" && (
-          <Typography variant="caption" color="text.secondary" sx={{ alignSelf: "center" }}>
-            Ask anything about your system — AI has full context of your logs
-          </Typography>
-        )}
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ alignSelf: "center" }}
+        >
+          {getModeDescription()}
+        </Typography>
       </Stack>
 
       {/* Log Context Banner (when in log mode) */}
-      {mode === "log" && logMessage && (
-        <Alert severity="info" icon={<DescriptionIcon />} sx={{ mb: 1 }}>
+      {mode === "log" && chatLog && (
+        <Alert
+          severity="info"
+          icon={<DescriptionIcon />}
+          action={
+            <Tooltip title="Clear log context">
+              <IconButton size="small" onClick={handleClearLogContext}>
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          }
+          sx={{ mb: 1 }}
+        >
           <Typography variant="caption" noWrap>
-            Analyzing: <strong>{logMessage}</strong>
+            Analyzing: <strong>{chatLog.message}</strong>
           </Typography>
         </Alert>
       )}
@@ -198,21 +296,40 @@ export default function Chat() {
         }}
       >
         {/* Empty state with suggestions */}
-        {messages.length === 0 && mode === "system" && (
+        {messages.length === 0 && (mode === "system" || mode === "query") && (
           <Box sx={{ textAlign: "center", py: 4 }}>
-            <SmartToyIcon
-              sx={{ fontSize: 48, color: "primary.main", mb: 1, opacity: 0.7 }}
-            />
+            {mode === "system" ? (
+              <SmartToyIcon
+                sx={{
+                  fontSize: 48,
+                  color: "primary.main",
+                  mb: 1,
+                  opacity: 0.7,
+                }}
+              />
+            ) : (
+              <SearchIcon
+                sx={{
+                  fontSize: 48,
+                  color: "primary.main",
+                  mb: 1,
+                  opacity: 0.7,
+                }}
+              />
+            )}
             <Typography variant="h6" gutterBottom>
-              Ask About Your System
+              {mode === "system"
+                ? "Ask About Your System"
+                : "Search Your Logs"}
             </Typography>
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ mb: 3, maxWidth: 400, mx: "auto" }}
+              sx={{ mb: 3, maxWidth: 440, mx: "auto" }}
             >
-              I have context of all your uploaded logs. Ask me about system health,
-              errors, patterns, or get recommendations.
+              {mode === "system"
+                ? "I have context of all your uploaded logs. Ask me about system health, errors, patterns, or get recommendations."
+                : "I'll search through your log entries to find what you need. Ask about specific events, errors, services, or time periods."}
             </Typography>
             <Stack
               direction="row"
@@ -221,7 +338,7 @@ export default function Chat() {
               justifyContent="center"
               useFlexGap
             >
-              {SYSTEM_SUGGESTIONS.map((suggestion) => (
+              {getSuggestions().map((suggestion) => (
                 <Chip
                   key={suggestion}
                   label={suggestion}
@@ -238,21 +355,30 @@ export default function Chat() {
         {messages.length === 0 && mode === "log" && (
           <Box sx={{ textAlign: "center", py: 4 }}>
             <DescriptionIcon
-              sx={{ fontSize: 48, color: "primary.main", mb: 1, opacity: 0.7 }}
+              sx={{
+                fontSize: 48,
+                color: "primary.main",
+                mb: 1,
+                opacity: 0.7,
+              }}
             />
             <Typography variant="h6" gutterBottom>
               Analyze This Log
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400, mx: "auto" }}>
-              Ask questions about this specific log entry. I&apos;ll help diagnose issues,
-              suggest fixes, and explain what happened.
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ maxWidth: 400, mx: "auto" }}
+            >
+              Ask questions about this specific log entry. I&apos;ll help
+              diagnose issues, suggest fixes, and explain what happened.
             </Typography>
           </Box>
         )}
 
-        {messages.map((message, i) => (
+        {messages.map((message) => (
           <Box
-            key={i}
+            key={message.id}
             sx={{
               display: "flex",
               justifyContent:
@@ -332,10 +458,14 @@ export default function Chat() {
 
               {message.sender === "bot" && (
                 <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                  <Tooltip title="Copy">
+                  <Tooltip
+                    title={copiedId === message.id ? "Copied!" : "Copy"}
+                  >
                     <IconButton
                       size="small"
-                      onClick={() => copyToClipboard(message.text)}
+                      onClick={() =>
+                        copyToClipboard(message.text, message.id)
+                      }
                     >
                       <ContentCopyIcon fontSize="small" />
                     </IconButton>
@@ -367,11 +497,7 @@ export default function Chat() {
         <TextField
           fullWidth
           variant="outlined"
-          placeholder={
-            mode === "system"
-              ? "Ask about your system health, errors, patterns..."
-              : "Ask about this log entry..."
-          }
+          placeholder={getPlaceholder()}
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}

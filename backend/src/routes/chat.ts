@@ -76,31 +76,24 @@ router.post("/chat", asyncHandler(async (req: Request, res: Response): Promise<v
     return;
   }
 
-  try {
-    const rowLog = await UnifiedLogModel.findById({
-      _id: logId,
-      ownerId: req.auth.userId,
-    });
+  const rowLog = await UnifiedLogModel.findOne({
+    _id: logId,
+    ownerId: req.auth.userId,
+  });
 
-    if (!rowLog) {
-      res.status(404).json({ error: "Log not found." });
-      return;
-    }
-
-    const prompt = getSeverityPrompt(rowLog.rawLine || "", userText);
-    const response = await model.generateContent(prompt);
-    const generatedText = response.response.text();
-
-    rowLog.analyzed = true;
-    await rowLog.save();
-
-    res.json({ response: generatedText });
-  } catch (error) {
-    console.error("Error while processing log:", error);
-    res.status(500).json({
-      error: "Something went wrong while analyzing the log.",
-    });
+  if (!rowLog) {
+    res.status(404).json({ error: "Log not found." });
+    return;
   }
+
+  const prompt = getSeverityPrompt(rowLog.rawLine || "", userText);
+  const response = await model.generateContent(prompt);
+  const generatedText = response.response.text();
+
+  rowLog.analyzed = true;
+  await rowLog.save();
+
+  res.json({ response: generatedText });
 }));
 
 export default router;

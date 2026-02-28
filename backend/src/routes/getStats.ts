@@ -101,31 +101,34 @@ router.get("/stats", asyncHandler(async (req: Request, res: Response) => {
       0
     );
 
-    //compute tends
-    const totalLogsTend = computeTrend(totalLogsData);
-    const errorLogsTend = computeTrend(errorLogsData);
-    const warningLogsTend = computeTrend(warningLogsData);
+    //compute trends (returns { direction, percentage })
+    const totalLogsTrend = computeTrend(totalLogsData);
+    const errorLogsTrend = computeTrend(errorLogsData);
+    const warningLogsTrend = computeTrend(warningLogsData);
 
     res.json([
       {
         title: "Total Logs",
-        value: totalLogsSum, // e.g. "14k" or a number
+        value: totalLogsSum,
         interval: "Last 90 days",
-        trend: totalLogsTend, // "up", "down", or "neutral"
-        data: totalLogsData, // [0, 3, 5, 2, ...] for 180 days
+        trend: totalLogsTrend.direction,
+        trendPercentage: totalLogsTrend.percentage,
+        data: totalLogsData,
       },
       {
         title: "Error Count",
         value: errorLogsSum,
         interval: "Last 90 days",
-        trend: errorLogsTend,
+        trend: errorLogsTrend.direction,
+        trendPercentage: errorLogsTrend.percentage,
         data: errorLogsData,
       },
       {
         title: "Warning Count",
         value: warningLogsSum,
         interval: "Last 90 days",
-        trend: warningLogsTend,
+        trend: warningLogsTrend.direction,
+        trendPercentage: warningLogsTrend.percentage,
         data: warningLogsData,
       },
     ]);
@@ -160,19 +163,34 @@ function buildDailyArray(
   return dailyArray;
 }
 
-function computeTrend(data: number[]) {
-  if (data.length < 2) return "neutral";
+function computeTrend(data: number[]): { direction: string; percentage: string } {
+  if (data.length < 14) return { direction: "neutral", percentage: "0%" };
 
-  const recentValue = data[data.length - 1];
-  const previousValue = data[data.length - 2];
+  // Compare last 7 days avg vs previous 7 days avg for stable trend
+  const recent7 = data.slice(-7);
+  const prev7 = data.slice(-14, -7);
 
-  if (recentValue > previousValue) {
-    return "up";
-  } else if (recentValue < previousValue) {
-    return "down";
-  } else {
-    return "neutral";
+  const recentAvg = recent7.reduce((a, b) => a + b, 0) / 7;
+  const prevAvg = prev7.reduce((a, b) => a + b, 0) / 7;
+
+  if (prevAvg === 0 && recentAvg === 0) {
+    return { direction: "neutral", percentage: "0%" };
   }
+
+  if (prevAvg === 0) {
+    return { direction: "up", percentage: "+100%" };
+  }
+
+  const change = ((recentAvg - prevAvg) / prevAvg) * 100;
+  const sign = change >= 0 ? "+" : "";
+  const percentage = `${sign}${Math.round(change)}%`;
+
+  let direction: string;
+  if (change > 5) direction = "up";
+  else if (change < -5) direction = "down";
+  else direction = "neutral";
+
+  return { direction, percentage };
 }
 
 export default router;

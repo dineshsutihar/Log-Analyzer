@@ -6,7 +6,7 @@ import { apiGet } from "./apiClient";
  * @returns {Promise<Object>} Health score data
  */
 export async function fetchHealthScore(token) {
-  return apiGet("/api/health-score", token);
+    return apiGet("/api/health-score", token);
 }
 
 /**
@@ -15,5 +15,5 @@ export async function fetchHealthScore(token) {
  * @returns {Promise<Object>} Insights data
  */
 export async function fetchInsights(token) {
-  return apiGet("/api/insights", token);
+    return apiGet("/api/insights", token);
 }
