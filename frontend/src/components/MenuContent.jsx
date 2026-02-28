@@ -8,10 +8,8 @@ import Stack from "@mui/material/Stack";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import AnalyticsRoundedIcon from "@mui/icons-material/AnalyticsRounded";
 import Chat from "@mui/icons-material/Chat";
-import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import CloudUpload from "@mui/icons-material/CloudUpload";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
-import HelpRoundedIcon from "@mui/icons-material/HelpRounded";
 import { useRecoilState } from "recoil";
 import { activeViewState } from "../utils/state";
 
@@ -23,14 +21,17 @@ const mainListItems = [
 ];
 
 const secondaryListItems = [
-  { text: "Settings", icon: <SettingsRoundedIcon /> },
-  { text: "About", icon: <InfoRoundedIcon /> },
-  { text: "Feedback", icon: <HelpRoundedIcon /> },
+  { text: "About", icon: <InfoRoundedIcon />, view: "about" },
 ];
 
 export default function MenuContent() {
-  const [_, setActiveView] = useRecoilState(activeViewState);
-  const [activeIndex, setActiveIndex] = React.useState(0);
+  const [activeView, setActiveView] = useRecoilState(activeViewState);
+  const mainActiveIndex = mainListItems.findIndex(
+    (item) => item.text.toLowerCase() === activeView
+  );
+  const secondaryActiveView = secondaryListItems.find(
+    (item) => item.view === activeView
+  );
 
   return (
     <Stack sx={{ flexGrow: 1, p: 1, justifyContent: "space-between" }}>
@@ -38,9 +39,8 @@ export default function MenuContent() {
         {mainListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: "block" }}>
             <ListItemButton
-              selected={activeIndex === index}
+              selected={mainActiveIndex === index && !secondaryActiveView}
               onClick={() => {
-                setActiveIndex(index);
                 setActiveView(item.text.toLowerCase());
               }}
             >
@@ -53,7 +53,12 @@ export default function MenuContent() {
       <List dense>
         {secondaryListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: "block" }}>
-            <ListItemButton>
+            <ListItemButton
+              selected={activeView === item.view}
+              onClick={() => {
+                setActiveView(item.view);
+              }}
+            >
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />
             </ListItemButton>

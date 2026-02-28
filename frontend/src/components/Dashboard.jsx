@@ -23,6 +23,7 @@ const MainGrid = React.lazy(() => import("./MainGrid"));
 const Analytics = React.lazy(() => import("./Analytics"));
 const Chat = React.lazy(() => import("./Chat"));
 const Upload = React.lazy(() => import("./Upload"));
+const About = React.lazy(() => import("./About"));
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -44,6 +45,8 @@ export default function Dashboard(props) {
         return <Chat />;
       case "upload":
         return <Upload />;
+      case "about":
+        return <About />;
       default:
         return <MainGrid />;
     }
