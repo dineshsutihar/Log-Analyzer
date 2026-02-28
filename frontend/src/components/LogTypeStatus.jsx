@@ -7,6 +7,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
+import Skeleton from "@mui/material/Skeleton";
 import LinearProgress, {
   linearProgressClasses,
 } from "@mui/material/LinearProgress";
@@ -138,7 +139,33 @@ export default function LogTypeStatus() {
     };
   });
 
-  if (loading) return <div>Loading...</div>;
+  if (loading)
+    return (
+      <Card
+        variant="outlined"
+        sx={{ display: "flex", flexDirection: "column", gap: "8px", flexGrow: 1, height: "100%" }}
+      >
+        <CardContent>
+          <Skeleton variant="text" width="50%" height={24} />
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              alignItems: "center",
+              gap: 2,
+              mt: 2,
+            }}
+          >
+            <Skeleton variant="circular" width={200} height={200} />
+            <Stack spacing={2} sx={{ flexGrow: 1, width: "100%" }}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} variant="rectangular" height={24} sx={{ borderRadius: 1 }} />
+              ))}
+            </Stack>
+          </Box>
+        </CardContent>
+      </Card>
+    );
   return (
     <Card
       variant="outlined"
