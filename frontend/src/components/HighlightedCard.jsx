@@ -4,10 +4,10 @@ import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
-import Divider from "@mui/material/Divider";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import InsightsRoundedIcon from "@mui/icons-material/InsightsRounded";
+import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { useRecoilState } from "recoil";
@@ -40,7 +40,7 @@ export default function HighlightedCard() {
           variant="caption"
           sx={{ color: "inherit", opacity: 0.85, display: "block", mb: 2 }}
         >
-          Upload logs or analyze them with AI
+          Monitor health, detect patterns, or upload new logs
         </Typography>
         <Stack spacing={1}>
           <Button
@@ -48,11 +48,26 @@ export default function HighlightedCard() {
             size="small"
             endIcon={<ChevronRightRoundedIcon />}
             fullWidth={isSmallScreen}
-            onClick={() => setActiveViewState("chat")}
+            onClick={() => setActiveViewState("health")}
             sx={{
               bgcolor: "rgba(255,255,255,0.2)",
               color: "inherit",
               "&:hover": { bgcolor: "rgba(255,255,255,0.3)" },
+            }}
+          >
+            <MonitorHeartIcon sx={{ mr: 0.5, fontSize: 16 }} />
+            Health Score
+          </Button>
+          <Button
+            variant="contained"
+            size="small"
+            endIcon={<ChevronRightRoundedIcon />}
+            fullWidth={isSmallScreen}
+            onClick={() => setActiveViewState("insights")}
+            sx={{
+              bgcolor: "rgba(255,255,255,0.15)",
+              color: "inherit",
+              "&:hover": { bgcolor: "rgba(255,255,255,0.25)" },
             }}
           >
             AI Insights
