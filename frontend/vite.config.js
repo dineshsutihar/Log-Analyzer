@@ -12,4 +12,17 @@ export default defineConfig({
       usePolling: true, 
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-mui': ['@mui/material', '@mui/icons-material'],
+          'vendor-mui-x': ['@mui/x-data-grid', '@mui/x-charts', '@mui/x-date-pickers'],
+          'vendor-clerk': ['@clerk/clerk-react'],
+          'vendor-markdown': ['react-markdown', 'react-syntax-highlighter'],
+        },
+      },
+    },
+  },
 });

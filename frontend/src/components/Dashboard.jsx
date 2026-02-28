@@ -3,9 +3,9 @@ import { alpha } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
+import CircularProgress from "@mui/material/CircularProgress";
 import DashNavBar from "./DashNavbar";
 import Header from "./Header";
-import MainGrid from "./MainGrid";
 import SideMenu from "./SideMenu";
 import AppTheme from "../theme/AppTheme";
 import {
@@ -14,12 +14,15 @@ import {
   datePickersCustomizations,
   treeViewCustomizations,
 } from "../theme/customizations";
-import Chat from "./Chat";
-import Analytics from "./Analytics";
 import { useRecoilValue } from "recoil";
 import { activeViewState } from "../utils/state";
-import Upload from "./Upload";
 import ErrorBoundary from "./ErrorBoundary";
+
+// Lazy load views for code splitting
+const MainGrid = React.lazy(() => import("./MainGrid"));
+const Analytics = React.lazy(() => import("./Analytics"));
+const Chat = React.lazy(() => import("./Chat"));
+const Upload = React.lazy(() => import("./Upload"));
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -74,7 +77,22 @@ export default function Dashboard(props) {
           >
             <Header />
             <ErrorBoundary>
-              {renderContent()}
+              <React.Suspense
+                fallback={
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      minHeight: 300,
+                    }}
+                  >
+                    <CircularProgress />
+                  </Box>
+                }
+              >
+                {renderContent()}
+              </React.Suspense>
             </ErrorBoundary>
           </Stack>
         </Box>
