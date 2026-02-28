@@ -303,13 +303,13 @@ export default function MainGrid() {
           <LogTypeStatus />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
+          <SeverityPieChart />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
           <LogAnalyzedBarChart />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <ErrorTrendChart />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <SeverityPieChart />
         </Grid>
       </Grid>
     </Box>
