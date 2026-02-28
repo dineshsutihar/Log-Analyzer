@@ -1,6 +1,5 @@
 import {
   Box,
-  CircularProgress,
   IconButton,
   Paper,
   Stack,
@@ -13,15 +12,21 @@ import {
   Chip,
   Alert,
   Badge,
+  Avatar,
+  InputAdornment,
+  Fade,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import SendIcon from "@mui/icons-material/Send";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import SmartToyIcon from "@mui/icons-material/SmartToy";
+import CheckIcon from "@mui/icons-material/Check";
+import PersonIcon from "@mui/icons-material/Person";
 import DescriptionIcon from "@mui/icons-material/Description";
 import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useRecoilState } from "recoil";
 import { chatLogState } from "../utils/state";
@@ -54,6 +59,7 @@ export default function Chat() {
   const [chatLog, setChatLog] = useRecoilState(chatLogState);
   const { getToken } = useAuth();
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
 
   // Three modes: "system" | "query" | "log"
   const [mode, setMode] = useState(chatLog ? "log" : "system");
@@ -180,34 +186,7 @@ export default function Chat() {
 
   const handleSuggestionClick = (suggestion) => {
     setNewMessage(suggestion);
-  };
-
-  const getModeDescription = () => {
-    switch (mode) {
-      case "system":
-        return "Ask about overall system health, trends, and recommendations";
-      case "query":
-        return "Search through your logs — ask about specific events, errors, or services";
-      case "log":
-        return chatLog
-          ? "Analyzing a specific log entry"
-          : "Select a log from Analytics to use this mode";
-      default:
-        return "";
-    }
-  };
-
-  const getPlaceholder = () => {
-    switch (mode) {
-      case "system":
-        return "Ask about system health, error trends, recommendations...";
-      case "query":
-        return 'Search your logs — e.g. "show me authentication failures today"';
-      case "log":
-        return "Ask about this specific log entry...";
-      default:
-        return "Type a message...";
-    }
+    inputRef.current?.focus();
   };
 
   const getSuggestions = () => {
@@ -216,307 +195,255 @@ export default function Chat() {
     return [];
   };
 
+  const getModeIcon = () => {
+    if (mode === "system") return <MonitorHeartIcon sx={{ fontSize: 48, mb: 1 }} />;
+    if (mode === "query") return <SearchIcon sx={{ fontSize: 48, mb: 1 }} />;
+    return <DescriptionIcon sx={{ fontSize: 48, mb: 1 }} />;
+  };
+
+  const getModeTitle = () => {
+    if (mode === "system") return "System Intelligence";
+    if (mode === "query") return "Search Your Logs";
+    return "Log Analysis";
+  };
+
+  const getModeSubtitle = () => {
+    if (mode === "system") return "I have context of all your uploaded logs. Ask me about system health, error patterns, or get recommendations.";
+    if (mode === "query") return "Search through your log entries. Ask about specific events, errors, or services.";
+    return chatLog ? "Ask questions about this specific log entry." : "Select a log from Analytics to use this mode.";
+  };
+
+  const getPlaceholder = () => {
+    switch (mode) {
+      case "system":
+        return "Ask about system health, error trends, recommendations...";
+      case "query":
+        return "Search your logs \u2014 e.g. \"show me authentication failures today\"";
+      case "log":
+        return "Ask about this specific log entry...";
+      default:
+        return "Type a message...";
+    }
+  };
+
   return (
-    <Stack sx={{ p: 2, height: "100%", width: "100%" }}>
-      {/* Mode Selector */}
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        spacing={2}
-        alignItems={{ xs: "stretch", sm: "center" }}
-        sx={{ mb: 2 }}
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        width: "100%",
+        maxWidth: 960,
+        mx: "auto",
+        overflow: "hidden",
+      }}
+    >
+      {/* Mode Selector Header */}
+      <Paper
+        elevation={0}
+        sx={{
+          px: 2,
+          py: 1.5,
+          borderBottom: 1,
+          borderColor: "divider",
+          flexShrink: 0,
+          bgcolor: "background.paper",
+        }}
       >
-        <ToggleButtonGroup
-          value={mode}
-          exclusive
-          onChange={handleModeChange}
-          size="small"
-        >
-          <ToggleButton value="system">
-            <MonitorHeartIcon sx={{ mr: 0.5 }} fontSize="small" />
-            System
-          </ToggleButton>
-          <ToggleButton value="query">
-            <SearchIcon sx={{ mr: 0.5 }} fontSize="small" />
-            Ask Logs
-          </ToggleButton>
-          <ToggleButton value="log" disabled={!chatLog}>
-            <Badge
-              color="primary"
-              variant="dot"
-              invisible={!chatLog}
-              sx={{ mr: 0.5 }}
-            >
-              <DescriptionIcon fontSize="small" />
-            </Badge>
-            <Box component="span" sx={{ ml: 0.5 }}>
+        <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+          <ToggleButtonGroup
+            value={mode}
+            exclusive
+            onChange={handleModeChange}
+            size="small"
+            sx={{
+              "& .MuiToggleButton-root": {
+                textTransform: "none",
+                fontWeight: 500,
+                px: 2,
+                gap: 0.5,
+                borderRadius: "20px !important",
+                border: "none",
+                mx: 0.3,
+                "&.Mui-selected": {
+                  bgcolor: alpha(theme.palette.primary.main, 0.12),
+                  color: "primary.main",
+                  fontWeight: 600,
+                },
+              },
+            }}
+          >
+            <ToggleButton value="system">
+              <MonitorHeartIcon fontSize="small" />
+              System
+            </ToggleButton>
+            <ToggleButton value="query">
+              <SearchIcon fontSize="small" />
+              Ask Logs
+            </ToggleButton>
+            <ToggleButton value="log" disabled={!chatLog}>
+              <Badge color="primary" variant="dot" invisible={!chatLog}>
+                <DescriptionIcon fontSize="small" />
+              </Badge>
               Log Detail
-            </Box>
-          </ToggleButton>
-        </ToggleButtonGroup>
-
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ alignSelf: "center" }}
-        >
-          {getModeDescription()}
-        </Typography>
-      </Stack>
-
-      {/* Log Context Banner (when in log mode) */}
-      {mode === "log" && chatLog && (
-        <Alert
-          severity="info"
-          icon={<DescriptionIcon />}
-          action={
+            </ToggleButton>
+          </ToggleButtonGroup>
+          {mode === "log" && chatLog && (
             <Tooltip title="Clear log context">
               <IconButton size="small" onClick={handleClearLogContext}>
                 <CloseIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-          }
-          sx={{ mb: 1 }}
-        >
-          <Typography variant="caption" noWrap>
-            Analyzing: <strong>{chatLog.message}</strong>
-          </Typography>
-        </Alert>
-      )}
+          )}
+        </Stack>
+        {mode === "log" && chatLog && (
+          <Alert severity="info" icon={<DescriptionIcon fontSize="small" />} sx={{ mt: 1, py: 0, "& .MuiAlert-message": { overflow: "hidden" } }}>
+            <Typography variant="caption" noWrap>Analyzing: <strong>{chatLog.message}</strong></Typography>
+          </Alert>
+        )}
+      </Paper>
 
-      {/* Chat Messages */}
-      <Paper
-        elevation={3}
-        sx={{
-          flex: 1,
-          overflowY: "auto",
-          p: 2,
-          mb: 2,
-          borderRadius: 3,
-          bgcolor: theme.palette.background.default,
-        }}
-      >
-        {/* Empty state with suggestions */}
-        {messages.length === 0 && (mode === "system" || mode === "query") && (
-          <Box sx={{ textAlign: "center", py: 4 }}>
-            {mode === "system" ? (
-              <SmartToyIcon
-                sx={{
-                  fontSize: 48,
-                  color: "primary.main",
-                  mb: 1,
-                  opacity: 0.7,
-                }}
-              />
-            ) : (
-              <SearchIcon
-                sx={{
-                  fontSize: 48,
-                  color: "primary.main",
-                  mb: 1,
-                  opacity: 0.7,
-                }}
-              />
+      {/* Messages Area */}
+      <Box sx={{ flex: 1, overflowY: "auto", py: 3, display: "flex", flexDirection: "column", gap: 2.5 }}>
+        {/* Empty state */}
+        {messages.length === 0 && (
+          <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", px: 3, opacity: 0.85 }}>
+            <Box sx={{ color: "primary.main", opacity: 0.6 }}>{getModeIcon()}</Box>
+            <Typography variant="h6" fontWeight={600} gutterBottom>{getModeTitle()}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 480 }}>{getModeSubtitle()}</Typography>
+            {getSuggestions().length > 0 && (
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center", maxWidth: 560 }}>
+                {getSuggestions().map((s) => (
+                  <Chip key={s} label={s} variant="outlined" clickable onClick={() => handleSuggestionClick(s)}
+                    sx={{ borderRadius: "16px", fontSize: "0.8rem", "&:hover": { bgcolor: alpha(theme.palette.primary.main, 0.08), borderColor: "primary.main" } }} />
+                ))}
+              </Box>
             )}
-            <Typography variant="h6" gutterBottom>
-              {mode === "system"
-                ? "Ask About Your System"
-                : "Search Your Logs"}
-            </Typography>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mb: 3, maxWidth: 440, mx: "auto" }}
-            >
-              {mode === "system"
-                ? "I have context of all your uploaded logs. Ask me about system health, errors, patterns, or get recommendations."
-                : "I'll search through your log entries to find what you need. Ask about specific events, errors, services, or time periods."}
-            </Typography>
-            <Stack
-              direction="row"
-              spacing={1}
-              flexWrap="wrap"
-              justifyContent="center"
-              useFlexGap
-            >
-              {getSuggestions().map((suggestion) => (
-                <Chip
-                  key={suggestion}
-                  label={suggestion}
-                  variant="outlined"
-                  clickable
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  sx={{ mb: 1 }}
-                />
-              ))}
-            </Stack>
           </Box>
         )}
 
-        {messages.length === 0 && mode === "log" && (
-          <Box sx={{ textAlign: "center", py: 4 }}>
-            <DescriptionIcon
-              sx={{
-                fontSize: 48,
-                color: "primary.main",
-                mb: 1,
-                opacity: 0.7,
-              }}
-            />
-            <Typography variant="h6" gutterBottom>
-              Analyze This Log
-            </Typography>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ maxWidth: 400, mx: "auto" }}
-            >
-              Ask questions about this specific log entry. I&apos;ll help
-              diagnose issues, suggest fixes, and explain what happened.
-            </Typography>
-          </Box>
-        )}
-
-        {messages.map((message) => (
-          <Box
-            key={message.id}
-            sx={{
-              display: "flex",
-              justifyContent:
-                message.sender === "user" ? "flex-end" : "flex-start",
-              mb: 2,
-            }}
-          >
-            <Paper
-              elevation={2}
-              sx={{
-                p: 2,
-                maxWidth: "75%",
-                bgcolor:
-                  message.sender === "user"
-                    ? theme.palette.primary.main
-                    : theme.palette.mode === "dark"
-                    ? theme.palette.background.paper
-                    : theme.palette.grey[100],
-                color:
-                  message.sender === "user"
-                    ? theme.palette.primary.contrastText
-                    : theme.palette.text.primary,
-                borderRadius: 3,
-                boxShadow: 3,
-              }}
-            >
-              <ReactMarkdown
-                children={message.text}
-                components={{
-                  p: ({ ...props }) => (
-                    <Typography
-                      variant="body1"
-                      {...props}
-                      sx={{ wordBreak: "break-word", mb: 1 }}
-                    />
-                  ),
-                  code: ({ inline, children, ...props }) =>
-                    inline ? (
-                      <Box
-                        component="code"
-                        sx={{
-                          backgroundColor: theme.palette.grey[800],
-                          px: 1,
-                          py: 0.2,
-                          borderRadius: 1,
-                          fontFamily: "monospace",
-                          fontSize: "0.875rem",
-                        }}
-                        {...props}
-                      >
-                        {children}
-                      </Box>
+        {/* Messages */}
+        {messages.map((message) => {
+          const isUser = message.sender === "user";
+          return (
+            <Fade key={message.id} in timeout={300}>
+              <Box sx={{ display: "flex", gap: 1.5, flexDirection: isUser ? "row-reverse" : "row", alignItems: "flex-start", maxWidth: 820, mx: "auto", width: "100%", px: { xs: 1, sm: 2 } }}>
+                <Avatar sx={{ width: 32, height: 32, bgcolor: isUser ? "primary.main" : alpha(theme.palette.primary.main, 0.12), color: isUser ? "primary.contrastText" : "primary.main", flexShrink: 0, mt: 0.5 }}>
+                  {isUser ? <PersonIcon sx={{ fontSize: 18 }} /> : <AutoAwesomeIcon sx={{ fontSize: 18 }} />}
+                </Avatar>
+                <Box sx={{ maxWidth: "80%", minWidth: 0 }}>
+                  <Paper elevation={0} sx={{
+                    p: 2,
+                    borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+                    bgcolor: isUser ? "primary.main" : (theme.palette.mode === "dark" ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.primary.main, 0.05)),
+                    color: isUser ? "primary.contrastText" : "text.primary",
+                    border: isUser ? "none" : 1,
+                    borderColor: "divider",
+                  }}>
+                    {isUser ? (
+                      <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{message.text}</Typography>
                     ) : (
-                      <SyntaxHighlighter
-                        language="javascript"
-                        style={materialDark}
-                        PreTag="div"
-                        customStyle={{
-                          borderRadius: "8px",
-                          fontSize: "0.9rem",
-                          padding: "1rem",
-                          marginTop: "8px",
-                        }}
-                        {...props}
-                      >
-                        {String(children).trim()}
-                      </SyntaxHighlighter>
-                    ),
-                }}
-              />
-              <Typography
-                variant="caption"
-                sx={{ display: "block", textAlign: "right", mt: 1 }}
-              >
-                {message.timestamp}
-              </Typography>
+                      <Box sx={{
+                        "& p": { m: 0, mb: 1, "&:last-child": { mb: 0 } },
+                        "& ul, & ol": { mt: 0.5, mb: 1, pl: 2.5 },
+                        "& li": { mb: 0.3 },
+                        "& h1,& h2,& h3,& h4,& h5,& h6": { mt: 1.5, mb: 0.5, "&:first-of-type": { mt: 0 } },
+                        "& hr": { my: 1.5, borderColor: "divider" },
+                        "& strong": { fontWeight: 700 },
+                        "& a": { color: "primary.main" },
+                      }}>
+                        <ReactMarkdown
+                          components={{
+                            p: ({ ...props }) => <Typography variant="body2" {...props} sx={{ lineHeight: 1.7, wordBreak: "break-word" }} />,
+                            code: ({ inline, children, className, ...props }) => {
+                              const lang = (className || "").replace("language-", "");
+                              return inline ? (
+                                <Box component="code" sx={{ bgcolor: "action.selected", px: 0.8, py: 0.2, borderRadius: 0.5, fontFamily: "monospace", fontSize: "0.82rem" }} {...props}>{children}</Box>
+                              ) : (
+                                <SyntaxHighlighter language={lang || "text"} style={materialDark} PreTag="div" customStyle={{ borderRadius: "8px", fontSize: "0.85rem", padding: "1rem", margin: "8px 0" }} {...props}>
+                                  {String(children).trim()}
+                                </SyntaxHighlighter>
+                              );
+                            },
+                          }}
+                        >
+                          {message.text}
+                        </ReactMarkdown>
+                      </Box>
+                    )}
+                  </Paper>
+                  {!isUser && (
+                    <Stack direction="row" spacing={0.5} sx={{ mt: 0.5, ml: 0.5 }}>
+                      <Tooltip title={copiedId === message.id ? "Copied!" : "Copy"}>
+                        <IconButton size="small" onClick={() => copyToClipboard(message.text, message.id)} sx={{ opacity: 0.5, "&:hover": { opacity: 1 } }}>
+                          {copiedId === message.id ? <CheckIcon sx={{ fontSize: 15 }} /> : <ContentCopyIcon sx={{ fontSize: 15 }} />}
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Regenerate">
+                        <IconButton size="small" onClick={() => handleSend(lastUserText)} sx={{ opacity: 0.5, "&:hover": { opacity: 1 } }}>
+                          <RefreshIcon sx={{ fontSize: 15 }} />
+                        </IconButton>
+                      </Tooltip>
+                      <Typography variant="caption" color="text.disabled" sx={{ alignSelf: "center", ml: 0.5, fontSize: "0.7rem" }}>{message.timestamp}</Typography>
+                    </Stack>
+                  )}
+                </Box>
+              </Box>
+            </Fade>
+          );
+        })}
 
-              {message.sender === "bot" && (
-                <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                  <Tooltip
-                    title={copiedId === message.id ? "Copied!" : "Copy"}
-                  >
-                    <IconButton
-                      size="small"
-                      onClick={() =>
-                        copyToClipboard(message.text, message.id)
-                      }
-                    >
-                      <ContentCopyIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Regenerate">
-                    <IconButton
-                      size="small"
-                      onClick={() => handleSend(lastUserText)}
-                    >
-                      <RefreshIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </Stack>
-              )}
-            </Paper>
-          </Box>
-        ))}
-
+        {/* Typing Indicator */}
         {isLoading && (
-          <Box display="flex" justifyContent="flex-start" mt={1}>
-            <CircularProgress size={24} />
+          <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-start", maxWidth: 820, mx: "auto", width: "100%", px: { xs: 1, sm: 2 } }}>
+            <Avatar sx={{ width: 32, height: 32, bgcolor: alpha(theme.palette.primary.main, 0.12), color: "primary.main" }}>
+              <AutoAwesomeIcon sx={{ fontSize: 18 }} />
+            </Avatar>
+            <Paper elevation={0} sx={{ p: 1.5, borderRadius: "18px 18px 18px 4px", bgcolor: theme.palette.mode === "dark" ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.primary.main, 0.05), border: 1, borderColor: "divider" }}>
+              <Stack direction="row" spacing={0.5} sx={{ py: 0.5, px: 0.5 }}>
+                {[0, 1, 2].map((i) => (
+                  <Box key={i} sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: "text.secondary", animation: "typing-bounce 1.4s infinite ease-in-out both", animationDelay: `${i * 0.16}s`, "@keyframes typing-bounce": { "0%, 80%, 100%": { transform: "scale(0.4)", opacity: 0.4 }, "40%": { transform: "scale(1)", opacity: 1 } } }} />
+                ))}
+              </Stack>
+            </Paper>
           </Box>
         )}
         <div ref={messagesEndRef} />
-      </Paper>
+      </Box>
 
-      {/* Input */}
-      <Stack direction="row" spacing={1}>
-        <TextField
-          fullWidth
-          variant="outlined"
-          placeholder={getPlaceholder()}
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-        />
-        <IconButton
-          color="primary"
-          onClick={() => handleSend()}
-          disabled={isLoading || !newMessage.trim()}
-          sx={{
-            bgcolor: "primary.main",
-            color: "white",
-            "&:hover": { bgcolor: "primary.dark" },
-            "&:disabled": { bgcolor: "action.disabledBackground" },
-            borderRadius: 2,
-          }}
-        >
-          <SendIcon />
-        </IconButton>
-      </Stack>
-    </Stack>
+      {/* Input Area */}
+      <Paper elevation={0} sx={{ p: 2, borderTop: 1, borderColor: "divider", flexShrink: 0, bgcolor: "background.paper" }}>
+        <Box sx={{ maxWidth: 820, mx: "auto" }}>
+          <TextField
+            fullWidth
+            inputRef={inputRef}
+            multiline
+            maxRows={4}
+            variant="outlined"
+            placeholder={getPlaceholder()}
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+            disabled={isLoading || (mode === "log" && !chatLog)}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => handleSend()} disabled={isLoading || !newMessage.trim()} color="primary"
+                      sx={{ bgcolor: newMessage.trim() ? "primary.main" : "transparent", color: newMessage.trim() ? "primary.contrastText" : "action.disabled", width: 36, height: 36, "&:hover": { bgcolor: newMessage.trim() ? "primary.dark" : "action.hover" }, transition: "all 0.2s" }}>
+                      <SendIcon sx={{ fontSize: 18 }} />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
+            sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3, bgcolor: theme.palette.mode === "dark" ? "action.hover" : "grey.50" } }}
+          />
+          <Typography variant="caption" color="text.disabled" sx={{ display: "block", textAlign: "center", mt: 0.5, fontSize: "0.7rem" }}>
+            AI may produce inaccurate results. Verify important findings.
+          </Typography>
+        </Box>
+      </Paper>
+    </Box>
   );
 }

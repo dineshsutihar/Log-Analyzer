@@ -20,8 +20,12 @@ import {
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import DeleteIcon from "@mui/icons-material/Delete";
+import InsightsIcon from "@mui/icons-material/Insights";
+import AnalyticsIcon from "@mui/icons-material/Analytics";
 import { styled } from "@mui/material/styles";
 import { useAuth } from "@clerk/clerk-react";
+import { useRecoilState } from "recoil";
+import { activeViewState } from "../utils/state";
 
 // Hidden input
 const VisuallyHiddenInput = styled("input")({
@@ -56,6 +60,7 @@ const Upload = () => {
   const [uploadStatus, setUploadStatus] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const { getToken } = useAuth();
+  const [, setActiveView] = useRecoilState(activeViewState);
 
   const handleOsChange = (event) => {
     setOsType(event.target.value);
@@ -301,6 +306,27 @@ const Upload = () => {
         <Alert severity={uploadStatus.type} sx={{ borderRadius: 1 }}>
           {uploadStatus.message}
         </Alert>
+      )}
+
+      {uploadStatus?.type === "success" && (
+        <Stack direction="row" spacing={1.5} justifyContent="center" sx={{ mt: 2 }}>
+          <Button
+            variant="contained"
+            startIcon={<InsightsIcon />}
+            onClick={() => setActiveView("insights")}
+            size="small"
+          >
+            View Insights
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<AnalyticsIcon />}
+            onClick={() => setActiveView("analytics")}
+            size="small"
+          >
+            View Analytics
+          </Button>
+        </Stack>
       )}
     </Box>
   );

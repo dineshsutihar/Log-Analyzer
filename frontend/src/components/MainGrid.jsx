@@ -26,6 +26,8 @@ import LogTypeStatus from "./LogTypeStatus";
 import HighlightedCard from "./HighlightedCard";
 import LogAnalyzedBarChart from "./LogAnalyzedBarGraph";
 import StatCard from "./StatCard";
+import SeverityPieChart from "./SeverityPieChart";
+import ErrorTrendChart from "./ErrorTrendChart";
 import fetchStats from "../utils/api/fetchStats";
 import { fetchHealthScore } from "../utils/api/healthInsights";
 import { useState, useEffect, useCallback, useRef } from "react";
@@ -302,6 +304,12 @@ export default function MainGrid() {
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <LogAnalyzedBarChart />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <ErrorTrendChart />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <SeverityPieChart />
         </Grid>
       </Grid>
     </Box>

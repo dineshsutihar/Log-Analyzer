@@ -10,11 +10,13 @@ dotenv.config();
 const router = express.Router();
 
 if (!process.env.GOOGLE_API_KEY) {
-  throw new Error("Missing GOOGLE_API_KEY in environment variables");
+  console.warn("⚠️  GOOGLE_API_KEY not set – AI chat features will be unavailable.");
 }
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+const genAI = process.env.GOOGLE_API_KEY
+  ? new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
+  : null;
+const model = genAI?.getGenerativeModel({ model: "gemini-2.5-flash" }) ?? null;
 
 /**
  * POST /api/chat/system
@@ -30,6 +32,11 @@ const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 router.post(
   "/chat/system",
   asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    if (!model) {
+      res.status(503).json({ error: "AI service is not configured. Set GOOGLE_API_KEY." });
+      return;
+    }
+
     const { userText } = req.body;
     const ownerId = req.auth.userId;
 

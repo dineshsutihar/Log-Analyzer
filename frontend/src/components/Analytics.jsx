@@ -1,5 +1,4 @@
 import * as React from "react";
-import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
@@ -64,13 +63,22 @@ export default function Analytics() {
   const activeFilterCount = [severityFilter, logTypeFilter, startDate, endDate].filter(Boolean).length;
 
   return (
-    <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
+    <Box
+      sx={{
+        width: "100%",
+        maxWidth: { sm: "100%", md: "1700px" },
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        minHeight: 0,
+      }}
+    >
       <Stack
         direction={{ xs: "column", sm: "row" }}
         justifyContent="space-between"
         alignItems={{ xs: "flex-start", sm: "center" }}
         spacing={2}
-        sx={{ mb: 2 }}
+        sx={{ mb: 2, flexShrink: 0 }}
       >
         <Typography component="h2" variant="h6">
           Log Analytics
@@ -96,12 +104,13 @@ export default function Analytics() {
       {/* Filter Bar */}
       <Stack
         direction={{ xs: "column", sm: "row" }}
-        spacing={2}
-        sx={{ mb: 2 }}
+        spacing={1.5}
+        sx={{ mb: 2, flexShrink: 0 }}
+        alignItems={{ xs: "stretch", sm: "center" }}
         flexWrap="wrap"
         useFlexGap
       >
-        <FormControl size="small" sx={{ minWidth: 140 }}>
+        <FormControl size="small" sx={{ minWidth: 130 }}>
           <InputLabel>Severity</InputLabel>
           <Select
             value={severityFilter}
@@ -115,7 +124,7 @@ export default function Analytics() {
             <MenuItem value="CRITICAL">Critical</MenuItem>
           </Select>
         </FormControl>
-        <FormControl size="small" sx={{ minWidth: 140 }}>
+        <FormControl size="small" sx={{ minWidth: 130 }}>
           <InputLabel>Log Type</InputLabel>
           <Select
             value={logTypeFilter}
@@ -135,7 +144,7 @@ export default function Analytics() {
           label="From"
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
-          InputLabelProps={{ shrink: true }}
+          slotProps={{ inputLabel: { shrink: true } }}
           sx={{ minWidth: 150 }}
         />
         <TextField
@@ -144,7 +153,7 @@ export default function Analytics() {
           label="To"
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
-          InputLabelProps={{ shrink: true }}
+          slotProps={{ inputLabel: { shrink: true } }}
           sx={{ minWidth: 150 }}
         />
         {hasActiveFilters && (
@@ -154,22 +163,20 @@ export default function Analytics() {
             size="small"
             color="primary"
             variant="outlined"
-            sx={{ alignSelf: "center" }}
           />
         )}
       </Stack>
 
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 12, lg: 12 }}>
-          <CustomizedDataGrid
-            key={refreshKey}
-            severityFilter={severityFilter}
-            logTypeFilter={logTypeFilter}
-            startDate={startDate}
-            endDate={endDate}
-          />
-        </Grid>
-      </Grid>
+      {/* DataGrid fills remaining space */}
+      <Box sx={{ flex: 1, minHeight: 400 }}>
+        <CustomizedDataGrid
+          key={refreshKey}
+          severityFilter={severityFilter}
+          logTypeFilter={logTypeFilter}
+          startDate={startDate}
+          endDate={endDate}
+        />
+      </Box>
     </Box>
   );
 }

@@ -278,8 +278,16 @@ export default function CustomizedDataGrid({
         }}
         getRowId={(row) => row.id}
         pageSizeOptions={[10, 20, 50, 100]}
-        density="compact"
+        density="standard"
+        rowHeight={48}
+        autoHeight
         onRowClick={handleRowClick}
+        sx={{
+          "& .MuiDataGrid-cell": {
+            display: "flex",
+            alignItems: "center",
+          },
+        }}
         slotProps={{
           filterPanel: {
             filterFormProps: {

@@ -12,11 +12,13 @@ router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 
 if (!process.env.GOOGLE_API_KEY) {
-  throw new Error("Missing GOOGLE_API_KEY in environment variables");
+  console.warn("⚠️  GOOGLE_API_KEY not set – AI chat features will be unavailable.");
 }
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+const genAI = process.env.GOOGLE_API_KEY
+  ? new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
+  : null;
+const model = genAI?.getGenerativeModel({ model: "gemini-2.5-flash" }) ?? null;
 
 const getSeverityPrompt = (line: string, userText?: string) => {
   const lower = line.toLowerCase();
@@ -70,6 +72,11 @@ const getSeverityPrompt = (line: string, userText?: string) => {
 };
 
 router.post("/chat", asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  if (!model) {
+    res.status(503).json({ error: "AI service is not configured. Set GOOGLE_API_KEY." });
+    return;
+  }
+
   const { logId, userText } = req.body;
   if (!logId) {
     res.status(400).json({ error: "logId is required." });
