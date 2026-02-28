@@ -11,6 +11,7 @@ import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
 import TroubleshootIcon from "@mui/icons-material/Troubleshoot";
@@ -20,13 +21,14 @@ import TrendingFlatIcon from "@mui/icons-material/TrendingFlat";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import LogTypeStatus from "./LogTypeStatus";
 import HighlightedCard from "./HighlightedCard";
 import LogAnalyzedBarChart from "./LogAnalyzedBarGraph";
 import StatCard from "./StatCard";
 import fetchStats from "../utils/api/fetchStats";
 import { fetchHealthScore } from "../utils/api/healthInsights";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { useRecoilState } from "recoil";
 import { activeViewState } from "../utils/state";
@@ -169,10 +171,12 @@ export default function MainGrid() {
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [lastRefreshed, setLastRefreshed] = useState(null);
   const { getToken } = useAuth();
   const [, setActiveView] = useRecoilState(activeViewState);
+  const refreshTimerRef = useRef(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -183,17 +187,24 @@ export default function MainGrid() {
       ]);
       setData(statsResponse);
       setHealth(healthResponse);
+      setLastRefreshed(new Date());
     } catch (err) {
       console.error("Error fetching data:", err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, [getToken]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+
+    // Auto-refresh every 5 minutes
+    refreshTimerRef.current = setInterval(fetchData, 5 * 60 * 1000);
+    return () => {
+      if (refreshTimerRef.current) clearInterval(refreshTimerRef.current);
+    };
+  }, [fetchData]);
 
   if (error) {
     return (
@@ -229,9 +240,28 @@ export default function MainGrid() {
 
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
-      <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
-        Overview
-      </Typography>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ mb: 2 }}
+      >
+        <Typography component="h2" variant="h6">
+          Overview
+        </Typography>
+        <Stack direction="row" spacing={1} alignItems="center">
+          {lastRefreshed && (
+            <Typography variant="caption" color="text.secondary">
+              Updated {lastRefreshed.toLocaleTimeString()}
+            </Typography>
+          )}
+          <Tooltip title="Refresh now">
+            <IconButton size="small" onClick={fetchData} disabled={loading}>
+              <RefreshIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      </Stack>
       <Grid
         container
         spacing={2}

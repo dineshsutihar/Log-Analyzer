@@ -9,8 +9,10 @@ import Tooltip from "@mui/material/Tooltip";
 import Skeleton from "@mui/material/Skeleton";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
+import ToggleButton from "@mui/material/ToggleButton";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { columns } from "./internals/data/gridData";
+import { columns as baseColumns, bookmarkColumn } from "./internals/data/gridData";
 import fetchAllLogs from "../utils/api/fetchLogAnalytics";
 import { deleteLog, bulkDeleteLogs } from "../utils/api/logManagement";
 import LogDetailsDialog from "./LogDetailsDialog";
@@ -39,6 +41,8 @@ function DataGridSkeleton() {
 export default function CustomizedDataGrid({
   severityFilter = "",
   logTypeFilter = "",
+  startDate = "",
+  endDate = "",
 }) {
   const [rows, setRows] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -54,6 +58,37 @@ export default function CustomizedDataGrid({
     severity: "success",
   });
   const { getToken } = useAuth();
+
+  // ---- Bookmark state (persisted in localStorage) ----
+  const BOOKMARK_KEY = "log_bookmarks";
+  const [bookmarkedIds, setBookmarkedIds] = React.useState(() => {
+    try {
+      const stored = localStorage.getItem(BOOKMARK_KEY);
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+  const [showBookmarkedOnly, setShowBookmarkedOnly] = React.useState(false);
+
+  const toggleBookmark = React.useCallback((id) => {
+    setBookmarkedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      localStorage.setItem(BOOKMARK_KEY, JSON.stringify([...next]));
+      return next;
+    });
+  }, []);
+
+  // Build columns with bookmark column prepended
+  const columnsWithBookmark = React.useMemo(
+    () => [bookmarkColumn(toggleBookmark), ...baseColumns],
+    [toggleBookmark]
+  );
 
   const fetchData = React.useCallback(async () => {
     try {
@@ -78,7 +113,14 @@ export default function CustomizedDataGrid({
 
   // Filter rows client-side based on props
   const filteredRows = React.useMemo(() => {
-    let result = rows;
+    // Inject bookmarked field
+    let result = rows.map((r) => ({
+      ...r,
+      bookmarked: bookmarkedIds.has(r.id),
+    }));
+    if (showBookmarkedOnly) {
+      result = result.filter((r) => r.bookmarked);
+    }
     if (severityFilter) {
       result = result.filter(
         (r) => r.severity?.toUpperCase() === severityFilter.toUpperCase()
@@ -89,8 +131,24 @@ export default function CustomizedDataGrid({
         (r) => r.logType?.toUpperCase() === logTypeFilter.toUpperCase()
       );
     }
+    if (startDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      result = result.filter((r) => {
+        const ts = new Date(r.timeStamp || r.uploadDate);
+        return ts >= start;
+      });
+    }
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      result = result.filter((r) => {
+        const ts = new Date(r.timeStamp || r.uploadDate);
+        return ts <= end;
+      });
+    }
     return result;
-  }, [rows, severityFilter, logTypeFilter]);
+  }, [rows, severityFilter, logTypeFilter, startDate, endDate, bookmarkedIds, showBookmarkedOnly]);
 
   const handleRowClick = (params) => {
     setSelectedRow(params.row);
@@ -151,38 +209,61 @@ export default function CustomizedDataGrid({
 
   return (
     <>
-      {/* Selection toolbar */}
-      {selectedIds.length > 0 && (
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={2}
-          sx={{
-            mb: 1,
-            p: 1,
-            bgcolor: "action.selected",
-            borderRadius: 1,
-          }}
-        >
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            {selectedIds.length} selected
-          </Typography>
-          <Tooltip title="Delete selected logs">
-            <IconButton
-              color="error"
-              size="small"
-              onClick={handleDeleteSelected}
-              disabled={deleting}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      )}
+      {/* Toolbar: bookmark filter + selection actions */}
+      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+        <Tooltip title={showBookmarkedOnly ? "Show all logs" : "Show bookmarked only"}>
+          <ToggleButton
+            value="bookmarked"
+            selected={showBookmarkedOnly}
+            onChange={() => setShowBookmarkedOnly((v) => !v)}
+            size="small"
+            sx={{ border: "none", px: 1.5 }}
+          >
+            <BookmarkIcon
+              fontSize="small"
+              sx={{ mr: 0.5, color: showBookmarkedOnly ? "warning.main" : "action.disabled" }}
+            />
+            <Typography variant="caption" sx={{ fontWeight: 500 }}>
+              {bookmarkedIds.size > 0
+                ? `Bookmarked (${bookmarkedIds.size})`
+                : "Bookmarked"}
+            </Typography>
+          </ToggleButton>
+        </Tooltip>
+
+        {selectedIds.length > 0 && (
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1}
+            sx={{
+              ml: "auto",
+              p: 0.5,
+              px: 1.5,
+              bgcolor: "action.selected",
+              borderRadius: 1,
+            }}
+          >
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              {selectedIds.length} selected
+            </Typography>
+            <Tooltip title="Delete selected logs">
+              <IconButton
+                color="error"
+                size="small"
+                onClick={handleDeleteSelected}
+                disabled={deleting}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+        )}
+      </Stack>
 
       <DataGrid
         rows={filteredRows}
-        columns={columns}
+        columns={columnsWithBookmark}
         checkboxSelection
         disableRowSelectionOnClick
         onRowSelectionModelChange={(newSelection) =>

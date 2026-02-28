@@ -1,7 +1,11 @@
 import * as React from "react";
 import Chip from "@mui/material/Chip";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 
 function renderSeverity(severity) {
   const colors = {
@@ -21,6 +25,41 @@ function renderAnalyzed(value) {
   ) : (
     <HighlightOffIcon color="disabled" fontSize="small" />
   );
+}
+
+/**
+ * Returns a bookmark column that calls `onToggle(rowId)` when clicked.
+ */
+export function bookmarkColumn(onToggle) {
+  return {
+    field: "bookmarked",
+    headerName: "",
+    width: 50,
+    sortable: false,
+    filterable: false,
+    disableColumnMenu: true,
+    renderCell: (params) => {
+      const isBookmarked = params.value;
+      return (
+        <Tooltip title={isBookmarked ? "Remove bookmark" : "Bookmark this log"}>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle(params.row.id);
+            }}
+            sx={{ color: isBookmarked ? "warning.main" : "action.disabled" }}
+          >
+            {isBookmarked ? (
+              <BookmarkIcon fontSize="small" />
+            ) : (
+              <BookmarkBorderIcon fontSize="small" />
+            )}
+          </IconButton>
+        </Tooltip>
+      );
+    },
+  };
 }
 
 export const columns = [

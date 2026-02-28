@@ -5,8 +5,6 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
-import TextField from "@mui/material/TextField";
-import InputAdornment from "@mui/material/InputAdornment";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
@@ -14,9 +12,8 @@ import InputLabel from "@mui/material/InputLabel";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import SearchIcon from "@mui/icons-material/Search";
+import TextField from "@mui/material/TextField";
 import DownloadIcon from "@mui/icons-material/Download";
-import DeleteIcon from "@mui/icons-material/Delete";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import CustomizedDataGrid from "./CustomizedDataGrid";
 import { exportLogs } from "../utils/api/logManagement";
@@ -24,9 +21,10 @@ import { useAuth } from "@clerk/clerk-react";
 
 export default function Analytics() {
   const { getToken } = useAuth();
-  const [searchQuery, setSearchQuery] = React.useState("");
   const [severityFilter, setSeverityFilter] = React.useState("");
   const [logTypeFilter, setLogTypeFilter] = React.useState("");
+  const [startDate, setStartDate] = React.useState("");
+  const [endDate, setEndDate] = React.useState("");
   const [refreshKey, setRefreshKey] = React.useState(0);
   const [exporting, setExporting] = React.useState(false);
 
@@ -38,6 +36,8 @@ export default function Analytics() {
         {
           severity: severityFilter || undefined,
           logType: logTypeFilter || undefined,
+          startDate: startDate || undefined,
+          endDate: endDate || undefined,
         },
         format,
         token
@@ -52,6 +52,16 @@ export default function Analytics() {
   const handleRefresh = () => {
     setRefreshKey((prev) => prev + 1);
   };
+
+  const handleClearFilters = () => {
+    setSeverityFilter("");
+    setLogTypeFilter("");
+    setStartDate("");
+    setEndDate("");
+  };
+
+  const hasActiveFilters = severityFilter || logTypeFilter || startDate || endDate;
+  const activeFilterCount = [severityFilter, logTypeFilter, startDate, endDate].filter(Boolean).length;
 
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
@@ -88,6 +98,8 @@ export default function Analytics() {
         direction={{ xs: "column", sm: "row" }}
         spacing={2}
         sx={{ mb: 2 }}
+        flexWrap="wrap"
+        useFlexGap
       >
         <FormControl size="small" sx={{ minWidth: 140 }}>
           <InputLabel>Severity</InputLabel>
@@ -117,14 +129,31 @@ export default function Analytics() {
             <MenuItem value="KERNEL">Kernel</MenuItem>
           </Select>
         </FormControl>
-        {(severityFilter || logTypeFilter) && (
+        <TextField
+          type="date"
+          size="small"
+          label="From"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+          sx={{ minWidth: 150 }}
+        />
+        <TextField
+          type="date"
+          size="small"
+          label="To"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+          sx={{ minWidth: 150 }}
+        />
+        {hasActiveFilters && (
           <Chip
-            label="Clear filters"
-            onDelete={() => {
-              setSeverityFilter("");
-              setLogTypeFilter("");
-            }}
+            label={`Clear ${activeFilterCount} filter${activeFilterCount > 1 ? "s" : ""}`}
+            onDelete={handleClearFilters}
             size="small"
+            color="primary"
+            variant="outlined"
             sx={{ alignSelf: "center" }}
           />
         )}
@@ -136,6 +165,8 @@ export default function Analytics() {
             key={refreshKey}
             severityFilter={severityFilter}
             logTypeFilter={logTypeFilter}
+            startDate={startDate}
+            endDate={endDate}
           />
         </Grid>
       </Grid>
