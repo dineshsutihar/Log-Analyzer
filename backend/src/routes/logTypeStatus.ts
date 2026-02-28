@@ -2,10 +2,11 @@ import express from "express";
 import { Request, Response } from "express";
 import { LinuxLogModel } from "../models/LinuxLogModel";
 import UnifiedLogModel from "../models/UnifiedLogModel";
+import { asyncHandler } from "../middleware/errorHandler";
 
 const router = express.Router();
 
-router.get("/logtypeStatus", async (req: Request, res: Response) => {
+router.get("/logtypeStatus", asyncHandler(async (req: Request, res: Response) => {
   const ownerId = req.auth.userId;
   try {
     const syslogCount = await UnifiedLogModel.countDocuments({
@@ -42,6 +43,6 @@ router.get("/logtypeStatus", async (req: Request, res: Response) => {
     console.error(error);
     res.status(500).json({ error: "Something went wrong." });
   }
-});
+}));
 
 export default router;

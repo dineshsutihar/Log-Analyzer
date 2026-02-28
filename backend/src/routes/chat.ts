@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from "dotenv";
 import UnifiedLogModel from "../models/UnifiedLogModel";
+import { asyncHandler } from "../middleware/errorHandler";
 
 dotenv.config();
 
@@ -68,7 +69,7 @@ const getSeverityPrompt = (line: string, userText?: string) => {
   return prompt;
 };
 
-router.post("/chat", async (req: Request, res: Response): Promise<void> => {
+router.post("/chat", asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { logId, userText } = req.body;
   if (!logId) {
     res.status(400).json({ error: "logId is required." });
@@ -100,6 +101,6 @@ router.post("/chat", async (req: Request, res: Response): Promise<void> => {
       error: "Something went wrong while analyzing the log.",
     });
   }
-});
+}));
 
 export default router;

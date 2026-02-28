@@ -1,10 +1,11 @@
 import express from "express";
 import { Request, Response } from "express";
 import UnifiedLogModel from "../models/UnifiedLogModel";
+import { asyncHandler } from "../middleware/errorHandler";
 
 const router = express.Router();
 
-router.get("/severityInfo", async (req: Request, res: Response) => {
+router.get("/severityInfo", asyncHandler(async (req: Request, res: Response) => {
   try {
     const info = [0, 0, 0, 0, 0, 0, 0];
     const warning = [0, 0, 0, 0, 0, 0, 0];
@@ -59,6 +60,6 @@ router.get("/severityInfo", async (req: Request, res: Response) => {
     console.error(error);
     res.status(500).json({ error: "Something went wrong." });
   }
-});
+}));
 
 export default router;

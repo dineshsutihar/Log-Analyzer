@@ -2,10 +2,11 @@ import express from "express";
 import { Request, Response } from "express";
 import { LinuxLogModel } from "../models/LinuxLogModel";
 import UnifiedLogModel from "../models/UnifiedLogModel";
+import { asyncHandler } from "../middleware/errorHandler";
 
 const router = express.Router();
 
-router.get("/stats", async (req: Request, res: Response) => {
+router.get("/stats", asyncHandler(async (req: Request, res: Response) => {
   try {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 90); // 90 days ago
@@ -132,7 +133,7 @@ router.get("/stats", async (req: Request, res: Response) => {
     console.error(error);
     res.status(500).json({ error: "Something went wrong." });
   }
-});
+}));
 
 function buildDailyArray(
   aggResults: {
