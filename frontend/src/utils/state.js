@@ -1,8 +1,8 @@
-import {atom} from 'recoil'; 
+import { atom } from 'recoil';
 
 export const activeViewState = atom({
-  key: 'activeViewState', 
-  default: 'home', 
+  key: 'activeViewState',
+  default: 'home',
 });
 
 // Simplified: only holds context when a specific log is selected for chat
@@ -12,7 +12,7 @@ export const chatLogState = atom({
 });
 
 // Legacy alias — kept for backward compatibility during migration
-export const userState = atom ({
-  key:'userState', 
-  default: {id: 0, text: "", sender: "user", logMessage: ""},
+export const userState = atom({
+  key: 'userState',
+  default: { id: 0, text: "", sender: "user", logMessage: "" },
 })

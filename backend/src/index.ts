@@ -50,7 +50,7 @@ declare global {
 
 // Validate required environment variables
 if (!process.env.CLERK_SECRET_KEY) {
-  throw new Error("CLERK_SECRET_KEY is not defined in environment variables");
+  logger.warn("CLERK_SECRET_KEY is not defined — auth will not work. Set it in .env");
 }
 
 const app = express();

@@ -21,10 +21,15 @@ export const initRedis = (): Redis => {
         port: redisPort,
         password: redisPassword,
         retryStrategy: (times) => {
-            const delay = Math.min(times * 50, 2000);
-            return delay;
+            if (times > 3) {
+                logger.warn('Redis max retries reached — running without cache');
+                return null; // stop retrying
+            }
+            return Math.min(times * 200, 2000);
         },
-        maxRetriesPerRequest: 3,
+        maxRetriesPerRequest: 1,
+        enableOfflineQueue: false,
+        lazyConnect: true,
     });
 
     redisClient.on('connect', () => {
@@ -32,11 +37,20 @@ export const initRedis = (): Redis => {
     });
 
     redisClient.on('error', (error) => {
-        logger.error(`Redis connection error: ${error.message}`);
+        // Only log once, not on every retry
+        if (!redisClient?.status || redisClient.status !== 'end') {
+            logger.error(`Redis connection error: ${error.message}`);
+        }
     });
 
     redisClient.on('close', () => {
         logger.warn('Redis connection closed');
+    });
+
+    // Attempt connection (lazyConnect: true means we need to call connect())
+    redisClient.connect().catch(() => {
+        logger.warn('Redis is not available — caching disabled');
+        redisClient = null;
     });
 
     return redisClient;

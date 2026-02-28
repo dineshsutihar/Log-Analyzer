@@ -1,6 +1,6 @@
 FROM node:22-bullseye-slim
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
