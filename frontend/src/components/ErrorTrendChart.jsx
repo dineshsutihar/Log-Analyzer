@@ -97,20 +97,20 @@ export default function ErrorTrendChart() {
               {
                 label: "Errors",
                 data: data?.error || [],
-                color: (theme.vars || theme).palette.error.main,
+                color: theme.palette.error.main,
                 showMark: true,
                 area: true,
               },
               {
                 label: "Critical",
                 data: data?.critical || [],
-                color: (theme.vars || theme).palette.error.dark,
+                color: theme.palette.error.dark,
                 showMark: true,
               },
               {
                 label: "Warnings",
                 data: data?.warning || [],
-                color: (theme.vars || theme).palette.warning.main,
+                color: theme.palette.warning.main,
                 showMark: false,
               },
             ]}

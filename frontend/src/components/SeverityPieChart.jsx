@@ -60,10 +60,10 @@ export default function SeverityPieChart() {
   const [loading, setLoading] = React.useState(true);
 
   const colors = [
-    (theme.vars || theme).palette.info.main,
-    (theme.vars || theme).palette.warning.main,
-    (theme.vars || theme).palette.error.main,
-    (theme.vars || theme).palette.error.dark,
+    theme.palette.info.main,
+    theme.palette.warning.main,
+    theme.palette.error.main,
+    theme.palette.error.dark,
   ];
 
   React.useEffect(() => {

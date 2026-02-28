@@ -13,10 +13,10 @@ export default function LogAnalyzedBarChart() {
   const theme = useTheme();
   const { getToken } = useAuth();
   const colorPalette = [
-    (theme.vars || theme).palette.info.main, // INFO
-    (theme.vars || theme).palette.warning.main, // WARNING
-    (theme.vars || theme).palette.error.main, // ERROR
-    (theme.vars || theme).palette.error.dark, // CRITICAL
+    theme.palette.info.main, // INFO
+    theme.palette.warning.main, // WARNING
+    theme.palette.error.main, // ERROR
+    theme.palette.error.dark, // CRITICAL
   ];
 
   const [logData, setLogData] = React.useState({
