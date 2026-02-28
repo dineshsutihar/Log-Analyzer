@@ -7,9 +7,11 @@ import Stack from "@mui/material/Stack";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { useTheme } from "@mui/material/styles";
 import severityInfo from "../utils/api/severityInfo";
+import { useAuth } from "@clerk/clerk-react";
 
 export default function LogAnalyzedBarChart() {
   const theme = useTheme();
+  const { getToken } = useAuth();
   const colorPalette = [
     (theme.vars || theme).palette.info.main, // INFO
     (theme.vars || theme).palette.warning.main, // WARNING
@@ -61,7 +63,8 @@ export default function LogAnalyzedBarChart() {
     // Fetch log data from backend
     const fetchLogData = async () => {
       try {
-        const response = await severityInfo();
+        const token = await getToken();
+        const response = await severityInfo(token);
         setLogData(response);
 
         const total = Object.values(response)

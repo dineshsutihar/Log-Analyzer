@@ -10,17 +10,23 @@ import SessionsChart from "./SessionsChart";
 import StatCard from "./StatCard";
 import fetchStats from "../utils/api/fetchStats";
 import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/clerk-react";
 
 export default function MainGrid() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { getToken } = useAuth();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetchStats();
+        const token = await getToken();
+        const response = await fetchStats(token);
         setData(response);
       } catch (error) {
         console.error("Error fetching data:", error);
+        setError(error.message);
       } finally {
         setLoading(false);
       }
@@ -28,6 +34,7 @@ export default function MainGrid() {
     fetchData();
   }, []);
   if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error loading dashboard: {error}</div>;
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
       {/* cards */}

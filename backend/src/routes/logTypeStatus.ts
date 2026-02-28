@@ -25,7 +25,8 @@ router.get("/logtypeStatus", async (req: Request, res: Response) => {
       ownerId,
     });
     const unknownCount = await UnifiedLogModel.countDocuments({
-      logType: { $regex: "UNKNOWN", ownerId },
+      logType: { $regex: "UNKNOWN" },
+      ownerId,
     });
 
     const data = [

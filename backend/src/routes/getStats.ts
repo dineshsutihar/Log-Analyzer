@@ -38,6 +38,7 @@ router.get("/stats", async (req: Request, res: Response) => {
         $match: {
           timestamp: { $gte: startDate },
           severity: { $in: ["ERROR"] },
+          ownerId: req.auth.userId,
         },
       },
       {
@@ -63,7 +64,8 @@ router.get("/stats", async (req: Request, res: Response) => {
       {
         $match: {
           timestamp: { $gte: startDate },
-          severity: { $in: ["WARNING"] }, // Adjust this based on your severity levels
+          severity: { $in: ["WARNING"] },
+          ownerId: req.auth.userId,
         },
       },
       {

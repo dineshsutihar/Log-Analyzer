@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { styled } from "@mui/material/styles";
+import { useAuth } from "@clerk/clerk-react";
 
 // Hidden input
 const VisuallyHiddenInput = styled("input")({
@@ -47,6 +48,8 @@ const Upload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const { getToken } = useAuth();
 
   const handleOsChange = (event) => {
     setOsType(event.target.value);
@@ -99,8 +102,10 @@ const Upload = () => {
 
     setIsUploading(true);
     setUploadStatus(null);
+    setUploadProgress(0);
 
     try {
+      const token = await getToken();
       const formData = new FormData();
       formData.append("logfile", selectedFile);
       formData.append("source", osType === "linux" ? linuxLogType : "csv");
@@ -109,19 +114,24 @@ const Upload = () => {
         `${import.meta.env.VITE_BACKEND_URL}/api/upload`,
         {
           method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
           body: formData,
         }
       );
 
-      if (!response.ok)
-        throw new Error(`Upload failed with status: ${response.status}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Upload failed with status: ${response.status}`);
+      }
 
+      setUploadProgress(100);
       setUploadStatus({
         type: "success",
-        message: "File uploaded successfully!",
+        message: "File uploaded and processed successfully!",
       });
-
-      // Add logic for additional questions here (after successful upload)
+      setSelectedFile(null);
     } catch (error) {
       console.error("Upload error:", error);
       setUploadStatus({

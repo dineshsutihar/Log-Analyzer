@@ -19,10 +19,12 @@ import chatApi from "../utils/api/chatApi";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { useAuth } from "@clerk/clerk-react";
 
 export default function Chat() {
   const theme = useTheme();
   const user = useRecoilValue(userState);
+  const { getToken } = useAuth();
   const logId = user.id;
   const logMessage = user.logMessage || "No context available";
   const messagesEndRef = useRef(null);
@@ -69,11 +71,11 @@ export default function Chat() {
     setIsLoading(true);
 
     try {
+      const token = await getToken();
       const response = await chatApi({
         logId,
         userText: text,
-        userId: user.id,
-      });
+      }, token);
       const botMsg = {
         id: Date.now() + 1,
         text: response.response || "No response",

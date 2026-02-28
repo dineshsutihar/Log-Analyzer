@@ -16,6 +16,7 @@ import Window from "@mui/icons-material/Window";
 import Kernel from "@mui/icons-material/Memory";
 import Auth from "@mui/icons-material/LockOpen";
 import logtypeStatus from "../utils/api/logtypeStatus";
+import { useAuth } from "@clerk/clerk-react";
 
 // const data = [
 //   { label: "SYSLOG", value: 50000 },
@@ -91,11 +92,13 @@ export default function LogTypeStatus() {
   const [data, setData] = React.useState([]);
   const [totalCount, setTotalCount] = React.useState("0");
   const [loading, setLoading] = React.useState(true);
+  const { getToken } = useAuth();
 
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await logtypeStatus();
+        const token = await getToken();
+        const response = await logtypeStatus(token);
         setData(response);
 
         //convert to string with the K notation

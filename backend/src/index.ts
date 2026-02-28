@@ -20,11 +20,20 @@ import {
   corsOptions,
 } from "./middleware/security";
 import { createIndexes } from "./db/indexes";
+import { initRedis } from "./utils/cache";
 
 import { clerkMiddleware, getAuth } from "@clerk/express";
 
 // Load environment variables
 dotenv.config();
+
+// Initialize Redis (optional - continues if Redis is not available)
+try {
+  initRedis();
+  logger.info('Redis initialization started');
+} catch (error) {
+  logger.warn(`Redis initialization failed: ${error}. Continuing without cache.`);
+}
 
 declare global {
   namespace Express {

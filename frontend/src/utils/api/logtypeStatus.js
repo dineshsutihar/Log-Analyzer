@@ -1,13 +1,5 @@
-export default async function logtypeStatus() {
-  const data = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/logtypeStatus`);
-    
-  if(!data.ok) {
-    throw new Error("Network response was not ok" + data.statusText);
-  }
+import { apiGet } from './apiClient';
 
-  const dataJson = await data.json();
-  if (!dataJson) {
-    throw new Error("No data found");
-  }
-  return dataJson;
+export default async function logtypeStatus(token) {
+  return apiGet('/api/logtypeStatus', token);
 }
