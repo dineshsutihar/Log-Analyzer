@@ -6,3 +6,13 @@ export default async function chatApi(logObject, token) {
     userText: logObject.userText || "",
   }, token);
 }
+
+/**
+ * System-wide AI chat — sends user question with aggregated log context.
+ * @param {string} userText - User's question about their system
+ * @param {string} token - Auth token
+ * @returns {Promise<{response: string}>}
+ */
+export async function chatSystemApi(userText, token) {
+  return apiPost('/api/chat/system', { userText }, token);
+}

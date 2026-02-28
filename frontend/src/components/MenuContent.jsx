@@ -10,11 +10,15 @@ import AnalyticsRoundedIcon from "@mui/icons-material/AnalyticsRounded";
 import Chat from "@mui/icons-material/Chat";
 import CloudUpload from "@mui/icons-material/CloudUpload";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
+import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
+import TroubleshootIcon from "@mui/icons-material/Troubleshoot";
 import { useRecoilState } from "recoil";
 import { activeViewState } from "../utils/state";
 
 const mainListItems = [
   { text: "Home", icon: <HomeRoundedIcon /> },
+  { text: "Health", icon: <MonitorHeartIcon /> },
+  { text: "Insights", icon: <TroubleshootIcon /> },
   { text: "Analytics", icon: <AnalyticsRoundedIcon /> },
   { text: "Chat", icon: <Chat /> },
   { text: "Upload", icon: <CloudUpload /> },

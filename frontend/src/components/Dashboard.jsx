@@ -24,6 +24,8 @@ const Analytics = React.lazy(() => import("./Analytics"));
 const Chat = React.lazy(() => import("./Chat"));
 const Upload = React.lazy(() => import("./Upload"));
 const About = React.lazy(() => import("./About"));
+const SystemHealth = React.lazy(() => import("./SystemHealth"));
+const LogInsights = React.lazy(() => import("./LogInsights"));
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -39,6 +41,10 @@ export default function Dashboard(props) {
     switch (activeView) {
       case "home":
         return <MainGrid />;
+      case "health":
+        return <SystemHealth />;
+      case "insights":
+        return <LogInsights />;
       case "analytics":
         return <Analytics />;
       case "chat":

@@ -7,20 +7,20 @@ import { apiGet, apiDelete, apiRequest } from './apiClient';
  * @returns {Promise<Object>} Search results with pagination
  */
 export async function searchLogs(params = {}, token = null) {
-  const query = new URLSearchParams();
-  
-  if (params.q) query.set('q', params.q);
-  if (params.severity) query.set('severity', params.severity);
-  if (params.logType) query.set('logType', params.logType);
-  if (params.os) query.set('os', params.os);
-  if (params.startDate) query.set('startDate', params.startDate);
-  if (params.endDate) query.set('endDate', params.endDate);
-  if (params.page) query.set('page', String(params.page));
-  if (params.limit) query.set('limit', String(params.limit));
-  if (params.sortBy) query.set('sortBy', params.sortBy);
-  if (params.sortOrder) query.set('sortOrder', params.sortOrder);
+    const query = new URLSearchParams();
 
-  return apiGet(`/api/logs/search?${query.toString()}`, token);
+    if (params.q) query.set('q', params.q);
+    if (params.severity) query.set('severity', params.severity);
+    if (params.logType) query.set('logType', params.logType);
+    if (params.os) query.set('os', params.os);
+    if (params.startDate) query.set('startDate', params.startDate);
+    if (params.endDate) query.set('endDate', params.endDate);
+    if (params.page) query.set('page', String(params.page));
+    if (params.limit) query.set('limit', String(params.limit));
+    if (params.sortBy) query.set('sortBy', params.sortBy);
+    if (params.sortOrder) query.set('sortOrder', params.sortOrder);
+
+    return apiGet(`/api/logs/search?${query.toString()}`, token);
 }
 
 /**
@@ -30,31 +30,31 @@ export async function searchLogs(params = {}, token = null) {
  * @param {string} token - Auth token
  */
 export async function exportLogs(params = {}, format = 'csv', token = null) {
-  const query = new URLSearchParams();
-  query.set('format', format);
-  
-  if (params.severity) query.set('severity', params.severity);
-  if (params.logType) query.set('logType', params.logType);
-  if (params.os) query.set('os', params.os);
-  if (params.startDate) query.set('startDate', params.startDate);
-  if (params.endDate) query.set('endDate', params.endDate);
+    const query = new URLSearchParams();
+    query.set('format', format);
 
-  const url = `${import.meta.env.VITE_BACKEND_URL}/api/logs/export?${query.toString()}`;
-  const response = await fetch(url, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
+    if (params.severity) query.set('severity', params.severity);
+    if (params.logType) query.set('logType', params.logType);
+    if (params.os) query.set('os', params.os);
+    if (params.startDate) query.set('startDate', params.startDate);
+    if (params.endDate) query.set('endDate', params.endDate);
 
-  if (!response.ok) throw new Error('Export failed');
+    const url = `${import.meta.env.VITE_BACKEND_URL}/api/logs/export?${query.toString()}`;
+    const response = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
 
-  const blob = await response.blob();
-  const downloadUrl = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = downloadUrl;
-  link.download = `logs-export-${new Date().toISOString().split('T')[0]}.${format === 'json' ? 'json' : 'csv'}`;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  window.URL.revokeObjectURL(downloadUrl);
+    if (!response.ok) throw new Error('Export failed');
+
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = `logs-export-${new Date().toISOString().split('T')[0]}.${format === 'json' ? 'json' : 'csv'}`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(downloadUrl);
 }
 
 /**
@@ -63,7 +63,7 @@ export async function exportLogs(params = {}, format = 'csv', token = null) {
  * @param {string} token - Auth token
  */
 export async function deleteLog(id, token = null) {
-  return apiDelete(`/api/logs/${id}`, token);
+    return apiDelete(`/api/logs/${id}`, token);
 }
 
 /**
@@ -72,10 +72,10 @@ export async function deleteLog(id, token = null) {
  * @param {string} token - Auth token
  */
 export async function bulkDeleteLogs(ids, token = null) {
-  return apiRequest('/api/logs', {
-    method: 'DELETE',
-    body: JSON.stringify({ ids }),
-  }, token);
+    return apiRequest('/api/logs', {
+        method: 'DELETE',
+        body: JSON.stringify({ ids }),
+    }, token);
 }
 
 /**
@@ -84,8 +84,8 @@ export async function bulkDeleteLogs(ids, token = null) {
  * @param {string} token - Auth token
  */
 export async function deleteAllLogs(filters = {}, token = null) {
-  return apiRequest('/api/logs', {
-    method: 'DELETE',
-    body: JSON.stringify({ deleteAll: true, filters }),
-  }, token);
+    return apiRequest('/api/logs', {
+        method: 'DELETE',
+        body: JSON.stringify({ deleteAll: true, filters }),
+    }, token);
 }

@@ -10,7 +10,10 @@ import connectToDatabase from "./db/connect";
 import severityInfo from "./routes/severityInfo";
 import getLogAnalytics from "./routes/getLogAnalytics";
 import chatRouter from "./routes/chat";
+import chatSystemRouter from "./routes/chatSystem";
 import logManagement from "./routes/logManagement";
+import healthScore from "./routes/healthScore";
+import insights from "./routes/insights";
 import logger from "./utils/logger";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import {
@@ -125,7 +128,10 @@ app.use("/api", logtypeStatus);
 app.use("/api", severityInfo);
 app.use("/api", getLogAnalytics);
 app.use("/api", chatRouter);
+app.use("/api", chatSystemRouter);
 app.use("/api", logManagement);
+app.use("/api", healthScore);
+app.use("/api", insights);
 
 // ==================== Error Handling ====================
 

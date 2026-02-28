@@ -13,60 +13,60 @@ const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
  * @returns {Promise<any>} Parsed JSON response
  */
 export async function apiRequest(endpoint, options = {}, token = null) {
-  const url = `${API_BASE_URL}${endpoint}`;
-  
-  const headers = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
+    const url = `${API_BASE_URL}${endpoint}`;
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
+    const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+    };
 
-  // Don't set Content-Type for FormData (browser sets it with boundary)
-  if (options.body instanceof FormData) {
-    delete headers['Content-Type'];
-  }
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+    // Don't set Content-Type for FormData (browser sets it with boundary)
+    if (options.body instanceof FormData) {
+        delete headers['Content-Type'];
+    }
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(
-      errorData.message || `Request failed with status: ${response.status}`
-    );
-  }
+    const response = await fetch(url, {
+        ...options,
+        headers,
+    });
 
-  return response.json();
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+            errorData.message || `Request failed with status: ${response.status}`
+        );
+    }
+
+    return response.json();
 }
 
 /**
  * Make an authenticated GET request.
  */
 export async function apiGet(endpoint, token = null) {
-  return apiRequest(endpoint, { method: 'GET' }, token);
+    return apiRequest(endpoint, { method: 'GET' }, token);
 }
 
 /**
  * Make an authenticated POST request.
  */
 export async function apiPost(endpoint, body, token = null) {
-  const options = {
-    method: 'POST',
-    body: body instanceof FormData ? body : JSON.stringify(body),
-  };
-  return apiRequest(endpoint, options, token);
+    const options = {
+        method: 'POST',
+        body: body instanceof FormData ? body : JSON.stringify(body),
+    };
+    return apiRequest(endpoint, options, token);
 }
 
 /**
  * Make an authenticated DELETE request.
  */
 export async function apiDelete(endpoint, token = null) {
-  return apiRequest(endpoint, { method: 'DELETE' }, token);
+    return apiRequest(endpoint, { method: 'DELETE' }, token);
 }
 
 export default { apiRequest, apiGet, apiPost, apiDelete };
