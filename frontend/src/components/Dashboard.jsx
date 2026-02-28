@@ -19,6 +19,7 @@ import Analytics from "./Analytics";
 import { useRecoilValue } from "recoil";
 import { activeViewState } from "../utils/state";
 import Upload from "./Upload";
+import ErrorBoundary from "./ErrorBoundary";
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -72,7 +73,9 @@ export default function Dashboard(props) {
             }}
           >
             <Header />
-            {renderContent()}
+            <ErrorBoundary>
+              {renderContent()}
+            </ErrorBoundary>
           </Stack>
         </Box>
       </Box>
