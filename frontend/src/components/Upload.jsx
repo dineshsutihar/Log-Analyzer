@@ -12,8 +12,14 @@ import {
   FormHelperText,
   CircularProgress,
   Alert,
+  LinearProgress,
+  Chip,
+  Stack,
+  Paper,
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { styled } from "@mui/material/styles";
 import { useAuth } from "@clerk/clerk-react";
 
@@ -207,9 +213,58 @@ const Upload = () => {
       </DropArea>
 
       {selectedFile && (
-        <Typography variant="body2" sx={{ mb: 2 }}>
-          Selected file: <strong>{selectedFile.name}</strong>
-        </Typography>
+        <Paper
+          variant="outlined"
+          sx={{
+            p: 2,
+            mb: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Stack direction="row" spacing={2} alignItems="center">
+            <InsertDriveFileIcon color="primary" />
+            <Box>
+              <Typography variant="body2" fontWeight={600}>
+                {selectedFile.name}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {(selectedFile.size / 1024).toFixed(1)} KB
+              </Typography>
+            </Box>
+          </Stack>
+          <Button
+            size="small"
+            color="error"
+            startIcon={<DeleteIcon />}
+            onClick={() => {
+              setSelectedFile(null);
+              setUploadStatus(null);
+            }}
+          >
+            Remove
+          </Button>
+        </Paper>
+      )}
+
+      {isUploading && (
+        <Box sx={{ mb: 2 }}>
+          <LinearProgress
+            variant={uploadProgress > 0 ? "determinate" : "indeterminate"}
+            value={uploadProgress}
+            sx={{ borderRadius: 1, height: 6 }}
+          />
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ mt: 0.5 }}
+          >
+            {uploadProgress > 0
+              ? `Uploading... ${uploadProgress}%`
+              : "Processing..."}
+          </Typography>
+        </Box>
       )}
 
       <Box textAlign="center" mb={2}>
@@ -227,6 +282,20 @@ const Upload = () => {
           )}
         </Button>
       </Box>
+
+      <Stack
+        direction="row"
+        spacing={1}
+        justifyContent="center"
+        sx={{ mb: 2 }}
+      >
+        <Chip
+          label={osType === "windows" ? "CSV files" : "LOG files"}
+          size="small"
+          variant="outlined"
+        />
+        <Chip label="Max 50 MB" size="small" variant="outlined" />
+      </Stack>
 
       {uploadStatus && (
         <Alert severity={uploadStatus.type} sx={{ borderRadius: 1 }}>
